@@ -198,6 +198,31 @@
   .emoji-picker { display:flex; flex-wrap:wrap; gap:7px; margin-top:4px; }
   .emoji-opt { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:21px; border:2px solid var(--border); cursor:pointer; background:var(--warm-white); transition:all .13px; }
   .emoji-opt.on { border-color:var(--ink); background:var(--cream); }
+
+  /* ── PHOTO UPLOAD ── */
+  .photo-upload-area { border:2px dashed var(--border); border-radius:11px; padding:18px; text-align:center; cursor:pointer; transition:all .18s; color:var(--ink-muted); font-size:13px; background:var(--warm-white); margin-bottom:10px; }
+  .photo-upload-area:hover { border-color:var(--ink-muted); }
+  .photo-upload-area input { display:none; }
+  .photo-preview-wrap { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .photo-preview-img { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border); flex-shrink:0; }
+  .photo-preview-actions { display:flex; flex-direction:column; gap:5px; }
+  .icon-mode-toggle { display:flex; gap:7px; margin-bottom:10px; }
+  .icon-mode-btn { flex:1; padding:8px; border:1.5px solid var(--border); border-radius:9px; background:var(--warm-white); font-size:12px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; text-align:center; transition:all .15s; color:var(--ink-muted); font-weight:500; }
+  .icon-mode-btn.on { background:var(--ink); border-color:var(--ink); color:var(--cream); }
+  .cat-chip .cat-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+
+  /* ── CROP MODAL ── */
+  .crop-overlay { display:none; position:fixed; inset:0; background:rgba(42,31,20,.7); z-index:600; align-items:center; justify-content:center; padding:16px; }
+  .crop-overlay.on { display:flex; }
+  .crop-box { background:var(--cream); border-radius:18px; padding:20px 16px 18px; width:100%; max-width:380px; }
+  .crop-title { font-family:'Nanum Myeongjo',serif; font-size:17px; font-weight:800; color:var(--ink); margin-bottom:14px; text-align:center; }
+  .crop-stage { position:relative; width:100%; aspect-ratio:1; background:#111; border-radius:12px; overflow:hidden; touch-action:none; cursor:grab; }
+  .crop-stage:active { cursor:grabbing; }
+  .crop-stage img { position:absolute; transform-origin:0 0; user-select:none; pointer-events:none; }
+  .crop-circle { position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 9999px rgba(0,0,0,.55); pointer-events:none; }
+  .crop-hint { font-size:11.5px; color:var(--ink-muted); text-align:center; margin:10px 0 14px; }
+  .crop-zoom { width:100%; margin-bottom:12px; accent-color:var(--accent); }
+  .crop-btns { display:flex; gap:8px; }
 </style>
 </head>
 <body>
@@ -329,12 +354,51 @@
     <div class="modal-title" id="catModalTitle">고양이 추가</div>
     <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="catName" placeholder="고양이 이름"></div>
     <div class="form-group">
-      <label class="form-label">아이콘</label>
-      <div class="emoji-picker" id="emojiPicker"></div>
+      <label class="form-label">아이콘 설정</label>
+      <div class="icon-mode-toggle">
+        <button class="icon-mode-btn on" id="modeEmoji" onclick="setIconMode('emoji')">😺 이모지</button>
+        <button class="icon-mode-btn" id="modePhoto" onclick="setIconMode('photo')">📷 사진</button>
+      </div>
+      <!-- EMOJI MODE -->
+      <div id="emojiSection">
+        <div class="emoji-picker" id="emojiPicker"></div>
+      </div>
+      <!-- PHOTO MODE -->
+      <div id="photoSection" style="display:none">
+        <div id="photoPreviewWrap" style="display:none" class="photo-preview-wrap">
+          <img id="photoPreviewImg" class="photo-preview-img" src="" alt="미리보기">
+          <div class="photo-preview-actions">
+            <button class="btn btn-cancel" style="font-size:11.5px;padding:6px 10px" onclick="openCropModal()">✂️ 다시 조절</button>
+            <button class="btn btn-cancel" style="font-size:11.5px;padding:6px 10px" onclick="clearPhoto()">🗑 삭제</button>
+          </div>
+        </div>
+        <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('catPhotoInput').click()">
+          <input type="file" id="catPhotoInput" accept="image/*" onchange="handlePhotoSelect(this)">
+          📷 사진을 탭해서 업로드<br>
+          <span style="font-size:11px;opacity:.7">업로드 후 얼굴 위치를 조절할 수 있어요</span>
+        </div>
+      </div>
     </div>
     <div class="btn-row" id="catBtnRow">
       <button class="btn btn-cancel" onclick="closeCatModal()">취소</button>
       <button class="btn btn-save" id="catSaveBtn" onclick="saveCat()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="crop-overlay" id="cropOverlay">
+  <div class="crop-box">
+    <div class="crop-title">얼굴 위치 조절</div>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropImg" src="" alt="">
+      <div class="crop-circle"></div>
+    </div>
+    <div class="crop-hint">드래그로 이동 · 아래 슬라이더로 크기 조절</div>
+    <input type="range" class="crop-zoom" id="cropZoom" min="0.5" max="3" step="0.01" value="1" oninput="onZoom(this.value)">
+    <div class="crop-btns">
+      <button class="btn btn-cancel" onclick="closeCropModal()">취소</button>
+      <button class="btn btn-save" style="flex:2" onclick="applyCrop()">✓ 적용</button>
     </div>
   </div>
 </div>
@@ -498,6 +562,16 @@ async function dbDeleteCat(id){
   const{error}=await sb.from('cats').delete().eq('id',id).eq('user_id',user.id);
   if(error)throw error;
 }
+async function dbUploadCatPhoto(dataUrl){
+  // base64 → blob
+  const res=await fetch(dataUrl);const blob=await res.blob();
+  const ext=blob.type.split('/')[1]||'jpg';
+  const path=`${user.id}/cats/${Date.now()}.${ext}`;
+  const{error}=await sb.storage.from('cat-photos').upload(path,blob,{upsert:true,contentType:blob.type});
+  if(error)throw error;
+  const{data}=sb.storage.from('cat-photos').getPublicUrl(path);
+  return data.publicUrl;
+}
 async function dbInsertItem(obj){
   const{data,error}=await sb.from('items').insert({user_id:user.id,...obj}).select().single();
   if(error)throw error; return data;
@@ -560,7 +634,10 @@ function renderCatBar(){
   cats.forEach(cat=>{
     const on=cat.id===active;
     const chip=document.createElement('div');chip.className='cat-chip'+(on?' on':'');
-    chip.innerHTML=`<span class="cat-avatar">${cat.emoji}</span>${cat.name}${on?`<span class="cat-edit-btn" data-id="${cat.id}">✏</span>`:''}`;
+    const avatarHtml=cat.photo_url
+      ?`<span class="cat-avatar" style="overflow:hidden"><img src="${cat.photo_url}" alt="${cat.name}"></span>`
+      :`<span class="cat-avatar">${cat.emoji}</span>`;
+    chip.innerHTML=`${avatarHtml}${cat.name}${on?`<span class="cat-edit-btn" data-id="${cat.id}">✏</span>`:''}`;
     chip.querySelector('.cat-edit-btn')?.addEventListener('click',e=>{e.stopPropagation();openEditCat(cat.id);});
     chip.addEventListener('click',e=>{
       if(e.target.classList.contains('cat-edit-btn'))return;
@@ -579,6 +656,7 @@ function openAddCat(){
   document.getElementById('catName').value='';
   document.querySelectorAll('.emoji-opt').forEach((e,i)=>e.classList.toggle('on',i===0));
   document.getElementById('catDeleteBtn')?.remove();
+  resetPhotoUI(); setIconMode('emoji');
   document.getElementById('catModal').classList.add('on');
 }
 function openEditCat(id){
@@ -588,6 +666,9 @@ function openEditCat(id){
   document.getElementById('catSaveBtn').textContent='저장';
   document.getElementById('catName').value=cat.name;
   document.querySelectorAll('.emoji-opt').forEach(e=>e.classList.toggle('on',e.textContent===cat.emoji));
+  resetPhotoUI();
+  if(cat.photo_url){setIconMode('photo');showPhotoPreview(cat.photo_url);croppedDataUrl=cat.photo_url;}
+  else{setIconMode('emoji');}
   document.getElementById('catDeleteBtn')?.remove();
   if(getCats().length>1){
     const b=document.createElement('button');b.id='catDeleteBtn';b.className='btn btn-danger';b.textContent='삭제';
@@ -609,21 +690,41 @@ function openEditCat(id){
 function closeCatModal(){document.getElementById('catModal').classList.remove('on');document.getElementById('catDeleteBtn')?.remove();editCatId=null;}
 async function saveCat(){
   const name=document.getElementById('catName').value.trim();if(!name){toast('이름을 입력해주세요');return;}
-  const emoji=document.querySelector('.emoji-opt.on')?.textContent||'🐱';
+  const usePhoto=document.getElementById('modePhoto').classList.contains('on');
+  const emoji=usePhoto?'📷':(document.querySelector('.emoji-opt.on')?.textContent||'🐱');
+  let photo_url=null;
+
+  if(usePhoto&&croppedDataUrl){
+    if(!isGuest&&user){
+      sync('busy');
+      try{photo_url=await dbUploadCatPhoto(croppedDataUrl);}
+      catch(e){toast('사진 업로드 실패');sync('err');return;}
+    } else {
+      // 게스트: base64 그대로 저장
+      photo_url=croppedDataUrl;
+    }
+  } else if(usePhoto&&editCatId){
+    // 사진 모드인데 새 사진 없으면 기존 유지
+    const existing=getCats().find(c=>c.id===editCatId);
+    photo_url=existing?.photo_url||null;
+  }
+
   if(!isGuest){
     sync('busy');
     try{
+      const payload={name,emoji,photo_url};
       if(editCatId!==null){
-        await dbUpdateCat(editCatId,name,emoji);
-        const cat=D.cats.find(c=>c.id===editCatId);if(cat){cat.name=name;cat.emoji=emoji;}
+        await sb.from('cats').update(payload).eq('id',editCatId).eq('user_id',user.id);
+        const cat=D.cats.find(c=>c.id===editCatId);if(cat)Object.assign(cat,payload);
       } else {
-        const nc=await dbInsertCat(name,emoji);D.cats.push(nc);D.activeCat=nc.id;
+        const{data,error}=await sb.from('cats').insert({user_id:user.id,...payload}).select().single();
+        if(error)throw error; D.cats.push(data); D.activeCat=data.id;
       }
       sync('ok');
     }catch(e){toast('저장 실패');sync('err');return;}
   } else {
-    if(editCatId!==null){const cat=G.cats.find(c=>c.id===editCatId);if(cat){cat.name=name;cat.emoji=emoji;}}
-    else{const nc={id:G.nid++,name,emoji};G.cats.push(nc);G.activeCat=nc.id;}
+    if(editCatId!==null){const cat=G.cats.find(c=>c.id===editCatId);if(cat){cat.name=name;cat.emoji=emoji;cat.photo_url=photo_url;}}
+    else{const nc={id:G.nid++,name,emoji,photo_url};G.cats.push(nc);G.activeCat=nc.id;}
     saveGuest();
   }
   closeCatModal();renderCatBar();renderAll();toast(editCatId?'수정됨':'추가됨');
@@ -632,7 +733,8 @@ async function saveCat(){
 // ── TODAY ─────────────────────────────────────────────────
 function renderToday(){
   const ds=todayStr();
-  const items=getItems().filter(i=>i.cat_id===getActiveCat()&&isDue(i,ds));
+  const activeCat=getActiveCat();
+  const items=getItems().filter(i=>(i.cat_id||i.catId)===activeCat&&isDue(i,ds));
   const total=items.length;
   const done=items.filter(i=>isLogDone(i.id,ds)).length;
   const pct=total?done/total:0,r=21,circ=2*Math.PI*r;
@@ -672,8 +774,8 @@ function renderToday(){
 }
 
 function isLogDone(itemId,ds){
-  if(isGuest)return G.logs.some(l=>l.cat===G.activeCat&&l.item===itemId&&l.date===ds&&l.done);
-  return D.logs.some(l=>l.item_id===itemId&&l.log_date===ds&&l.done);
+  if(isGuest)return G.logs.some(l=>l.cat===G.activeCat&&String(l.item)===String(itemId)&&l.date===ds&&l.done);
+  return D.logs.some(l=>String(l.item_id)===String(itemId)&&l.log_date===ds&&l.done);
 }
 
 async function toggleLog(itemId,ds){
@@ -699,7 +801,9 @@ async function toggleLog(itemId,ds){
 // ── MANAGE ────────────────────────────────────────────────
 function renderManage(){
   const list=document.getElementById('manageList');
-  const items=getItems().filter(i=>i.cat_id===getActiveCat());
+  // 게스트: catId, 로그인: cat_id 통합 처리
+  const activeCat=getActiveCat();
+  const items=getItems().filter(i=>(i.cat_id||i.catId)===activeCat);
   if(items.length===0){list.innerHTML=`<div class="empty-state"><div class="emoji">💊</div><p>등록된 약·영양제가 없어요.<br>+ 버튼으로 추가해보세요!</p></div>`;return;}
   list.innerHTML='';
   items.forEach(item=>{
@@ -710,7 +814,11 @@ function renderManage(){
         <div class="item-name">${item.name}</div>
         <div class="item-meta"><span class="item-time">⏰ ${item.time}</span><span>${FREQ[item.freq]}</span>${item.dose?`<span>${item.dose}</span>`:''}</div>
       </div>
-      <button class="item-action" onclick="openEditItem(${item.id},event)">✏️</button>`;
+      <button class="item-action">✏️</button>`;
+    // UUID 포함 id를 안전하게 클로저로 전달
+    card.querySelector('.item-action').addEventListener('click', e=>{
+      e.stopPropagation(); openEditItem(item.id, e);
+    });
     list.appendChild(card);
   });
 }
@@ -720,7 +828,8 @@ let selDate=todayStr();
 function renderLog(){
   renderCalStrip();
   const list=document.getElementById('logList');
-  const items=getItems().filter(i=>i.cat_id===getActiveCat()&&isDue(i,selDate));
+  const activeCat2=getActiveCat();
+  const items=getItems().filter(i=>(i.cat_id||i.catId)===activeCat2&&isDue(i,selDate));
   if(items.length===0){list.innerHTML=`<div class="empty-state"><div class="emoji">📭</div><p>${fmtDate(selDate)}<br>복용 일정이 없어요</p></div>`;return;}
   list.innerHTML=`<div style="font-size:12.5px;color:var(--ink-muted);margin-bottom:10px">${fmtDate(selDate)}</div>`;
   items.forEach(item=>{
@@ -766,7 +875,7 @@ function openAddModal(){
 }
 function openEditItem(id,e){
   if(e)e.stopPropagation();
-  const item=getItems().find(i=>i.id===id);if(!item)return;
+  const item=getItems().find(i=>String(i.id)===String(id));if(!item)return;
   editItemId=id;curType=item.type;selTimes=[item.time];
   document.getElementById('itemModalTitle').textContent='약 편집';
   document.getElementById('itemSaveBtn').textContent='수정 저장';
@@ -821,6 +930,129 @@ async function saveItem(){
     else{G.items.push({id:G.nid++,...obj});saveGuest();}
   }
   closeItemModal();renderAll();toast('저장됨');
+}
+
+// ── PHOTO / CROP ──────────────────────────────────────────
+let croppedDataUrl=null;
+let cropImgNaturalW=0,cropImgNaturalH=0;
+let cropX=0,cropY=0,cropScale=1,cropStageSize=0;
+let dragStartX=0,dragStartY=0,dragStartCropX=0,dragStartCropY=0,isDragging=false;
+
+function setIconMode(mode){
+  document.getElementById('modeEmoji').classList.toggle('on',mode==='emoji');
+  document.getElementById('modePhoto').classList.toggle('on',mode==='photo');
+  document.getElementById('emojiSection').style.display=mode==='emoji'?'block':'none';
+  document.getElementById('photoSection').style.display=mode==='photo'?'block':'none';
+}
+
+function resetPhotoUI(){
+  croppedDataUrl=null;
+  document.getElementById('catPhotoInput').value='';
+  document.getElementById('photoPreviewWrap').style.display='none';
+  document.getElementById('photoUploadArea').style.display='block';
+}
+
+function showPhotoPreview(url){
+  document.getElementById('photoPreviewImg').src=url;
+  document.getElementById('photoPreviewWrap').style.display='flex';
+  document.getElementById('photoUploadArea').style.display='none';
+}
+
+function clearPhoto(){
+  resetPhotoUI();
+  croppedDataUrl=null;
+}
+
+function handlePhotoSelect(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{openCropModalWithSrc(e.target.result);};
+  reader.readAsDataURL(file);
+}
+
+function openCropModal(){
+  if(croppedDataUrl)openCropModalWithSrc(croppedDataUrl);
+}
+
+function openCropModalWithSrc(src){
+  const img=document.getElementById('cropImg');
+  img.onload=()=>{
+    cropImgNaturalW=img.naturalWidth;cropImgNaturalH=img.naturalHeight;
+    const stage=document.getElementById('cropStage');
+    cropStageSize=stage.offsetWidth;
+    // fit image to stage
+    cropScale=cropStageSize/Math.min(cropImgNaturalW,cropImgNaturalH);
+    cropX=(cropStageSize-cropImgNaturalW*cropScale)/2;
+    cropY=(cropStageSize-cropImgNaturalH*cropScale)/2;
+    document.getElementById('cropZoom').value=cropScale;
+    applyCropTransform();
+  };
+  img.src=src;
+  document.getElementById('cropZoom').min=0.3;
+  document.getElementById('cropZoom').max=5;
+  setupCropDrag();
+  document.getElementById('cropOverlay').classList.add('on');
+}
+
+function closeCropModal(){document.getElementById('cropOverlay').classList.remove('on');}
+
+function applyCropTransform(){
+  document.getElementById('cropImg').style.transform=`translate(${cropX}px,${cropY}px) scale(${cropScale})`;
+}
+
+function onZoom(val){
+  const newScale=parseFloat(val);
+  const cx=cropStageSize/2,cy=cropStageSize/2;
+  // zoom toward center
+  cropX=cx-(cx-cropX)*newScale/cropScale;
+  cropY=cy-(cy-cropY)*newScale/cropScale;
+  cropScale=newScale;
+  applyCropTransform();
+}
+
+function setupCropDrag(){
+  const stage=document.getElementById('cropStage');
+  // remove old listeners by cloning
+  const newStage=stage.cloneNode(true);
+  stage.parentNode.replaceChild(newStage,stage);
+  // re-attach crop-circle (it's a child, already cloned)
+
+  const onStart=e=>{
+    isDragging=true;
+    const pt=e.touches?e.touches[0]:e;
+    dragStartX=pt.clientX;dragStartY=pt.clientY;
+    dragStartCropX=cropX;dragStartCropY=cropY;
+    e.preventDefault();
+  };
+  const onMove=e=>{
+    if(!isDragging)return;
+    const pt=e.touches?e.touches[0]:e;
+    cropX=dragStartCropX+(pt.clientX-dragStartX);
+    cropY=dragStartCropY+(pt.clientY-dragStartY);
+    applyCropTransform();
+    e.preventDefault();
+  };
+  const onEnd=()=>{isDragging=false;};
+  newStage.addEventListener('mousedown',onStart);
+  newStage.addEventListener('touchstart',onStart,{passive:false});
+  window.addEventListener('mousemove',onMove);
+  window.addEventListener('touchmove',onMove,{passive:false});
+  window.addEventListener('mouseup',onEnd);
+  window.addEventListener('touchend',onEnd);
+}
+
+function applyCrop(){
+  const size=cropStageSize;
+  const canvas=document.createElement('canvas');
+  canvas.width=300;canvas.height=300;
+  const ctx=canvas.getContext('2d');
+  ctx.beginPath();ctx.arc(150,150,150,0,Math.PI*2);ctx.clip();
+  const img=document.getElementById('cropImg');
+  const ratio=300/size;
+  ctx.drawImage(img,cropX*ratio,cropY*ratio,cropImgNaturalW*cropScale*ratio,cropImgNaturalH*cropScale*ratio);
+  croppedDataUrl=canvas.toDataURL('image/jpeg',0.85);
+  showPhotoPreview(croppedDataUrl);
+  closeCropModal();
 }
 </script>
 </body>
