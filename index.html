@@ -473,198 +473,6 @@ let sb = null;
   tryNext();
 })();
 
-function initApp() {
-
-
-// ── CONSTANTS ────────────────────────────────────────────
-const EMOJIS = ['🐱','🐈','🐈‍⬛','😸','😺','😻','🦁','🐯','🐾'];
-const FREQ   = {daily:'매일',alt:'격일',weekly:'매주',mon:'월·수·금',tue:'화·목·토'};
-
-// ── STATE ────────────────────────────────────────────────
-let user = null, isGuest = false;
-// 게스트용 로컬 스토리지 상태
-let G = JSON.parse(localStorage.getItem('catGuest') || 'null') || {
-  cats:[{id:1,name:'냥이',emoji:'🐱'}], activeCat:1, items:[], logs:[], nid:100
-};
-// 로그인 유저 데이터 (Supabase에서 로드)
-let D = { cats:[], items:[], logs:[] };
-
-const saveGuest = () => localStorage.setItem('catGuest', JSON.stringify(G));
-
-// ── UTILS ────────────────────────────────────────────────
-function todayStr(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
-function p2(n){return String(n).padStart(2,'0');}
-function fmtDate(s){const[y,m,d]=s.split('-');const days=['일','월','화','수','목','금','토'];return `${+m}월 ${+d}일 (${days[new Date(+y,+m-1,+d).getDay()]})`;}
-function isDue(item,ds){
-  const dt=new Date(ds),day=dt.getDay();
-  if(item.freq==='daily')return true;
-  if(item.freq==='alt'){const c=new Date(item.created_date||item.created);return Math.round((dt-c)/86400000)%2===0;}
-  if(item.freq==='weekly')return new Date(item.created_date||item.created).getDay()===day;
-  if(item.freq==='mon')return[1,3,5].includes(day);
-  if(item.freq==='tue')return[2,4,6].includes(day);
-  return true;
-}
-function toast(msg){document.querySelectorAll('.toast-el').forEach(e=>e.remove());const el=document.createElement('div');el.className='toast-el';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600);}
-function sync(s){const d=document.getElementById('syncDot');d.className='sync-dot'+(s==='busy'?' busy':s==='err'?' err':'');}
-function showCf(emoji,msg,onOk){document.getElementById('cfEmoji').textContent=emoji;document.getElementById('cfMsg').textContent=msg;document.getElementById('cfOk').onclick=()=>{closeCf();onOk();};document.getElementById('cfOverlay').classList.add('on');}
-function closeCf(){document.getElementById('cfOverlay').classList.remove('on');}
-
-// ── DATA ACCESSORS (통합: 게스트 vs 로그인) ───────────────
-function getCats(){return isGuest?G.cats:D.cats;}
-function getActiveCat(){return isGuest?G.activeCat:D.activeCat;}
-function setActiveCat(id){if(isGuest){G.activeCat=id;saveGuest();}else{D.activeCat=id;}}
-function getItems(){return isGuest?G.items:D.items;}
-function getLogs(){return isGuest?G.logs:D.logs;}
-
-// ── AUTH ──────────────────────────────────────────────────
-function setAuthMode(m){
-  document.getElementById('atab-login').classList.toggle('on',m==='login');
-  document.getElementById('atab-signup').classList.toggle('on',m==='signup');
-  document.getElementById('auth-btn').textContent=m==='login'?'로그인':'회원가입';
-  hideMsg();
-}
-function showMsg(type,msg){const el=document.getElementById('auth-'+type);el.textContent=msg;el.style.display='block';}
-function hideMsg(){['err','ok'].forEach(t=>{const el=document.getElementById('auth-'+t);if(el)el.style.display='none';});}
-function showAuth(){document.getElementById('auth').style.display='flex';document.getElementById('app').style.display='none';}
-
-async function doAuth(){
-  const email=document.getElementById('a-email').value.trim();
-  const pw=document.getElementById('a-pw').value;
-  const btn=document.getElementById('auth-btn');
-  const isLogin=btn.textContent==='로그인';
-  if(!email||!pw){showMsg('err','이메일과 비밀번호를 입력해주세요.');return;}
-  btn.disabled=true; btn.textContent=isLogin?'로그인 중...':'가입 중...';
-  hideMsg();
-  try {
-    let res;
-    if(isLogin){
-      res=await sb.auth.signInWithPassword({email,password:pw});
-    } else {
-      res=await sb.auth.signUp({email,password:pw});
-      if(!res.error&&res.data?.user&&!res.data.session){showMsg('ok','확인 이메일을 보냈어요! 메일을 확인해주세요.');btn.disabled=false;btn.textContent='회원가입';return;}
-    }
-    if(res.error){showMsg('err',res.error.message);btn.disabled=false;btn.textContent=isLogin?'로그인':'회원가입';return;}
-    if(res.data?.user) await enterApp(res.data.user);
-  } catch(e){showMsg('err','오류가 발생했어요. 다시 시도해주세요.');btn.disabled=false;btn.textContent=isLogin?'로그인':'회원가입';}
-}
-
-function doGuest(){
-  isGuest=true; user=null;
-  document.getElementById('guestBadge').style.display='inline';
-  document.getElementById('btnSignup').style.display='block';
-  document.getElementById('hdrEmail').textContent='';
-  document.getElementById('panelEmail').textContent='게스트 모드';
-  sync('ok');
-  document.getElementById('auth').style.display='none';
-  document.getElementById('app').style.display='flex';
-  renderAll(); renderCatBar();
-}
-
-async function enterApp(u){
-  user=u; isGuest=false;
-  document.getElementById('hdrEmail').textContent=u.email;
-  document.getElementById('panelEmail').textContent=u.email;
-  document.getElementById('guestBadge').style.display='none';
-  document.getElementById('btnSignup').style.display='none';
-  document.getElementById('auth').style.display='none';
-  document.getElementById('app').style.display='flex';
-  await loadAll();
-  renderAll(); renderCatBar();
-}
-
-async function doSignOut(){
-  await sb.auth.signOut();
-  user=null; isGuest=false; D={cats:[],items:[],logs:[],activeCat:null};
-  closeAcctPanel();
-  document.getElementById('app').style.display='none';
-  document.getElementById('auth').style.display='flex';
-  setAuthMode('login');
-}
-
-function toggleAcctPanel(){document.getElementById('acctPanel').classList.toggle('on');}
-function closeAcctPanel(){document.getElementById('acctPanel').classList.remove('on');}
-document.addEventListener('click',e=>{if(!e.target.closest('.header-right'))closeAcctPanel();});
-
-// ── SUPABASE CRUD ─────────────────────────────────────────
-async function loadAll(){
-  if(isGuest||!user)return;
-  sync('busy');
-  try{
-    const[cats,items,logs]=await Promise.all([
-      sb.from('cats').select('*').eq('user_id',user.id).order('created_at'),
-      sb.from('items').select('*').eq('user_id',user.id).order('created_at'),
-      sb.from('logs').select('*').eq('user_id',user.id).order('log_date',{ascending:false}),
-    ]);
-    D.cats=cats.data||[]; D.items=items.data||[]; D.logs=logs.data||[];
-    if(!D.activeCat&&D.cats.length>0)D.activeCat=D.cats[0].id;
-    sync('ok');
-  }catch(e){sync('err');toast('데이터 로드 실패');}
-}
-
-async function dbInsertCat(name,emoji){
-  const{data,error}=await sb.from('cats').insert({user_id:user.id,name,emoji}).select().single();
-  if(error)throw error; return data;
-}
-async function dbUpdateCat(id,name,emoji){
-  const{error}=await sb.from('cats').update({name,emoji}).eq('id',id).eq('user_id',user.id);
-  if(error)throw error;
-}
-async function dbDeleteCat(id){
-  const{error}=await sb.from('cats').delete().eq('id',id).eq('user_id',user.id);
-  if(error)throw error;
-}
-async function dbUploadCatPhoto(dataUrl){
-  // base64 → blob
-  const res=await fetch(dataUrl);const blob=await res.blob();
-  const ext=blob.type.split('/')[1]||'jpg';
-  const path=`${user.id}/cats/${Date.now()}.${ext}`;
-  const{error}=await sb.storage.from('cat-photos').upload(path,blob,{upsert:true,contentType:blob.type});
-  if(error)throw error;
-  const{data}=sb.storage.from('cat-photos').getPublicUrl(path);
-  return data.publicUrl;
-}
-async function dbInsertItem(obj){
-  const{data,error}=await sb.from('items').insert({user_id:user.id,...obj}).select().single();
-  if(error)throw error; return data;
-}
-async function dbUpdateItem(id,obj){
-  const{error}=await sb.from('items').update(obj).eq('id',id).eq('user_id',user.id);
-  if(error)throw error;
-}
-async function dbDeleteItem(id){
-  const{error}=await sb.from('items').delete().eq('id',id).eq('user_id',user.id);
-  if(error)throw error;
-}
-async function dbUpsertLog(itemId,date,done){
-  // upsert: (user_id, item_id, log_date) unique
-  const{error}=await sb.from('logs').upsert({user_id:user.id,item_id:itemId,log_date:date,done},{onConflict:'user_id,item_id,log_date'});
-  if(error)throw error;
-}
-
-// ── INIT ──────────────────────────────────────────────────
-  // emoji picker
-  const ep=document.getElementById('emojiPicker');
-  EMOJIS.forEach((e,i)=>{
-    const d=document.createElement('div');d.className='emoji-opt'+(i===0?' on':'');d.textContent=e;
-    d.onclick=()=>{document.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('on'));d.classList.add('on');};
-    ep.appendChild(d);
-  });
-  // today label
-  document.getElementById('todayDateLbl').textContent=fmtDate(todayStr());
-  // supabase session check
-  (async()=>{
-    try{
-      const{data:{session}}=await sb.auth.getSession();
-      if(session?.user){await enterApp(session.user);}
-      else{document.getElementById('auth').style.display='flex';}
-    }catch(e){document.getElementById('auth').style.display='flex';}
-    finally{document.getElementById('loading').style.display='none';}
-    sb.auth.onAuthStateChange(async(event,session)=>{
-      if(event==='SIGNED_IN'&&session?.user&&!user)await enterApp(session.user);
-      else if(event==='SIGNED_OUT'){user=null;}
-    });
-  })();
-
 // ── TABS ──────────────────────────────────────────────────
 function showTab(t){
   ['today','manage','log'].forEach(n=>{
@@ -1131,7 +939,198 @@ function applyCrop(){
   closeCropModal();
 }
 
-} // end initApp
+// ── CONSTANTS ────────────────────────────────────────────
+const EMOJIS = ['🐱','🐈','🐈‍⬛','😸','😺','😻','🦁','🐯','🐾'];
+const FREQ   = {daily:'매일',alt:'격일',weekly:'매주',mon:'월·수·금',tue:'화·목·토'};
+
+// ── STATE ────────────────────────────────────────────────
+let user = null, isGuest = false;
+// 게스트용 로컬 스토리지 상태
+let G = JSON.parse(localStorage.getItem('catGuest') || 'null') || {
+  cats:[{id:1,name:'냥이',emoji:'🐱'}], activeCat:1, items:[], logs:[], nid:100
+};
+// 로그인 유저 데이터 (Supabase에서 로드)
+let D = { cats:[], items:[], logs:[] };
+
+const saveGuest = () => localStorage.setItem('catGuest', JSON.stringify(G));
+
+// ── UTILS ────────────────────────────────────────────────
+function todayStr(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
+function p2(n){return String(n).padStart(2,'0');}
+function fmtDate(s){const[y,m,d]=s.split('-');const days=['일','월','화','수','목','금','토'];return `${+m}월 ${+d}일 (${days[new Date(+y,+m-1,+d).getDay()]})`;}
+function isDue(item,ds){
+  const dt=new Date(ds),day=dt.getDay();
+  if(item.freq==='daily')return true;
+  if(item.freq==='alt'){const c=new Date(item.created_date||item.created);return Math.round((dt-c)/86400000)%2===0;}
+  if(item.freq==='weekly')return new Date(item.created_date||item.created).getDay()===day;
+  if(item.freq==='mon')return[1,3,5].includes(day);
+  if(item.freq==='tue')return[2,4,6].includes(day);
+  return true;
+}
+function toast(msg){document.querySelectorAll('.toast-el').forEach(e=>e.remove());const el=document.createElement('div');el.className='toast-el';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600);}
+function sync(s){const d=document.getElementById('syncDot');d.className='sync-dot'+(s==='busy'?' busy':s==='err'?' err':'');}
+function showCf(emoji,msg,onOk){document.getElementById('cfEmoji').textContent=emoji;document.getElementById('cfMsg').textContent=msg;document.getElementById('cfOk').onclick=()=>{closeCf();onOk();};document.getElementById('cfOverlay').classList.add('on');}
+function closeCf(){document.getElementById('cfOverlay').classList.remove('on');}
+
+// ── DATA ACCESSORS (통합: 게스트 vs 로그인) ───────────────
+function getCats(){return isGuest?G.cats:D.cats;}
+function getActiveCat(){return isGuest?G.activeCat:D.activeCat;}
+function setActiveCat(id){if(isGuest){G.activeCat=id;saveGuest();}else{D.activeCat=id;}}
+function getItems(){return isGuest?G.items:D.items;}
+function getLogs(){return isGuest?G.logs:D.logs;}
+
+// ── AUTH ──────────────────────────────────────────────────
+function setAuthMode(m){
+  document.getElementById('atab-login').classList.toggle('on',m==='login');
+  document.getElementById('atab-signup').classList.toggle('on',m==='signup');
+  document.getElementById('auth-btn').textContent=m==='login'?'로그인':'회원가입';
+  hideMsg();
+}
+function showMsg(type,msg){const el=document.getElementById('auth-'+type);el.textContent=msg;el.style.display='block';}
+function hideMsg(){['err','ok'].forEach(t=>{const el=document.getElementById('auth-'+t);if(el)el.style.display='none';});}
+function showAuth(){document.getElementById('auth').style.display='flex';document.getElementById('app').style.display='none';}
+
+async function doAuth(){
+  const email=document.getElementById('a-email').value.trim();
+  const pw=document.getElementById('a-pw').value;
+  const btn=document.getElementById('auth-btn');
+  const isLogin=btn.textContent==='로그인';
+  if(!email||!pw){showMsg('err','이메일과 비밀번호를 입력해주세요.');return;}
+  btn.disabled=true; btn.textContent=isLogin?'로그인 중...':'가입 중...';
+  hideMsg();
+  try {
+    let res;
+    if(isLogin){
+      res=await sb.auth.signInWithPassword({email,password:pw});
+    } else {
+      res=await sb.auth.signUp({email,password:pw});
+      if(!res.error&&res.data?.user&&!res.data.session){showMsg('ok','확인 이메일을 보냈어요! 메일을 확인해주세요.');btn.disabled=false;btn.textContent='회원가입';return;}
+    }
+    if(res.error){showMsg('err',res.error.message);btn.disabled=false;btn.textContent=isLogin?'로그인':'회원가입';return;}
+    if(res.data?.user) await enterApp(res.data.user);
+  } catch(e){showMsg('err','오류가 발생했어요. 다시 시도해주세요.');btn.disabled=false;btn.textContent=isLogin?'로그인':'회원가입';}
+}
+
+function doGuest(){
+  isGuest=true; user=null;
+  document.getElementById('guestBadge').style.display='inline';
+  document.getElementById('btnSignup').style.display='block';
+  document.getElementById('hdrEmail').textContent='';
+  document.getElementById('panelEmail').textContent='게스트 모드';
+  sync('ok');
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='flex';
+  renderAll(); renderCatBar();
+}
+
+async function enterApp(u){
+  user=u; isGuest=false;
+  document.getElementById('hdrEmail').textContent=u.email;
+  document.getElementById('panelEmail').textContent=u.email;
+  document.getElementById('guestBadge').style.display='none';
+  document.getElementById('btnSignup').style.display='none';
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='flex';
+  await loadAll();
+  renderAll(); renderCatBar();
+}
+
+async function doSignOut(){
+  await sb.auth.signOut();
+  user=null; isGuest=false; D={cats:[],items:[],logs:[],activeCat:null};
+  closeAcctPanel();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  setAuthMode('login');
+}
+
+function toggleAcctPanel(){document.getElementById('acctPanel').classList.toggle('on');}
+function closeAcctPanel(){document.getElementById('acctPanel').classList.remove('on');}
+document.addEventListener('click',e=>{if(!e.target.closest('.header-right'))closeAcctPanel();});
+
+// ── SUPABASE CRUD ─────────────────────────────────────────
+async function loadAll(){
+  if(isGuest||!user)return;
+  sync('busy');
+  try{
+    const[cats,items,logs]=await Promise.all([
+      sb.from('cats').select('*').eq('user_id',user.id).order('created_at'),
+      sb.from('items').select('*').eq('user_id',user.id).order('created_at'),
+      sb.from('logs').select('*').eq('user_id',user.id).order('log_date',{ascending:false}),
+    ]);
+    D.cats=cats.data||[]; D.items=items.data||[]; D.logs=logs.data||[];
+    if(!D.activeCat&&D.cats.length>0)D.activeCat=D.cats[0].id;
+    sync('ok');
+  }catch(e){sync('err');toast('데이터 로드 실패');}
+}
+
+async function dbInsertCat(name,emoji){
+  const{data,error}=await sb.from('cats').insert({user_id:user.id,name,emoji}).select().single();
+  if(error)throw error; return data;
+}
+async function dbUpdateCat(id,name,emoji){
+  const{error}=await sb.from('cats').update({name,emoji}).eq('id',id).eq('user_id',user.id);
+  if(error)throw error;
+}
+async function dbDeleteCat(id){
+  const{error}=await sb.from('cats').delete().eq('id',id).eq('user_id',user.id);
+  if(error)throw error;
+}
+async function dbUploadCatPhoto(dataUrl){
+  // base64 → blob
+  const res=await fetch(dataUrl);const blob=await res.blob();
+  const ext=blob.type.split('/')[1]||'jpg';
+  const path=`${user.id}/cats/${Date.now()}.${ext}`;
+  const{error}=await sb.storage.from('cat-photos').upload(path,blob,{upsert:true,contentType:blob.type});
+  if(error)throw error;
+  const{data}=sb.storage.from('cat-photos').getPublicUrl(path);
+  return data.publicUrl;
+}
+async function dbInsertItem(obj){
+  const{data,error}=await sb.from('items').insert({user_id:user.id,...obj}).select().single();
+  if(error)throw error; return data;
+}
+async function dbUpdateItem(id,obj){
+  const{error}=await sb.from('items').update(obj).eq('id',id).eq('user_id',user.id);
+  if(error)throw error;
+}
+async function dbDeleteItem(id){
+  const{error}=await sb.from('items').delete().eq('id',id).eq('user_id',user.id);
+  if(error)throw error;
+}
+async function dbUpsertLog(itemId,date,done){
+  // upsert: (user_id, item_id, log_date) unique
+  const{error}=await sb.from('logs').upsert({user_id:user.id,item_id:itemId,log_date:date,done},{onConflict:'user_id,item_id,log_date'});
+  if(error)throw error;
+}
+
+// ── INIT ──────────────────────────────────────────────────
+
+function initApp() {
+  // emoji picker
+  const ep=document.getElementById('emojiPicker');
+  EMOJIS.forEach((e,i)=>{
+    const d=document.createElement('div');d.className='emoji-opt'+(i===0?' on':'');d.textContent=e;
+    d.onclick=()=>{document.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('on'));d.classList.add('on');};
+    ep.appendChild(d);
+  });
+  // today label
+  document.getElementById('todayDateLbl').textContent=fmtDate(todayStr());
+  // supabase session check
+  (async()=>{
+    try{
+      const{data:{session}}=await sb.auth.getSession();
+      if(session?.user){await enterApp(session.user);}
+      else{document.getElementById('auth').style.display='flex';}
+    }catch(e){document.getElementById('auth').style.display='flex';}
+    finally{document.getElementById('loading').style.display='none';}
+    sb.auth.onAuthStateChange(async(event,session)=>{
+      if(event==='SIGNED_IN'&&session?.user&&!user)await enterApp(session.user);
+      else if(event==='SIGNED_OUT'){user=null;}
+    });
+  })();
+
+}
 </script>
 </body>
 </html>
