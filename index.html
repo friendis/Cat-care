@@ -23,13 +23,13 @@
   #loading { position:fixed; inset:0; background:var(--cream); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; gap:1rem; }
   .spinner { width:26px; height:26px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  .loading-logo { font-family:'Nanum Myeongjo',serif; font-size:1.6rem; font-weight:800; color:var(--ink); }
+  .loading-logo { font-family:Nanum Myeongjo,serif; font-size:1.6rem; font-weight:800; color:var(--ink); }
   .loading-logo span { color:var(--accent); }
 
   /* ── AUTH ── */
   #auth { display:none; min-height:100vh; align-items:center; justify-content:center; padding:1rem; }
   .auth-box { background:var(--warm-white); border:1px solid var(--border); border-radius:18px; padding:2rem 1.75rem 1.75rem; width:100%; max-width:360px; box-shadow:0 8px 40px var(--shadow); }
-  .auth-logo { font-family:'Nanum Myeongjo',serif; font-size:1.8rem; font-weight:800; color:var(--ink); text-align:center; margin-bottom:.2rem; }
+  .auth-logo { font-family:Nanum Myeongjo,serif; font-size:1.8rem; font-weight:800; color:var(--ink); text-align:center; margin-bottom:.2rem; }
   .auth-logo span { color:var(--accent); }
   .auth-sub { font-size:.68rem; color:var(--ink-muted); text-align:center; letter-spacing:.2em; text-transform:uppercase; margin-bottom:1.75rem; }
   .auth-tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:1.1rem; }
@@ -49,7 +49,7 @@
 
   /* HEADER */
   .header { background:var(--ink); color:var(--cream); padding:20px 20px 14px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
-  .header-title { font-family:'Nanum Myeongjo',serif; font-size:20px; font-weight:800; letter-spacing:-.5px; }
+  .header-title { font-family:Nanum Myeongjo,serif; font-size:20px; font-weight:800; letter-spacing:-.5px; }
   .header-title span { color:var(--accent-soft); }
   .header-right { display:flex; align-items:center; gap:.5rem; position:relative; }
   .sync-dot { width:6px; height:6px; border-radius:50%; background:var(--mint); flex-shrink:0; }
@@ -89,7 +89,7 @@
   /* SECTIONS */
   .section { display:none; padding:18px 14px; max-width:520px; margin:0 auto; width:100%; }
   .section.on { display:block; }
-  .section-label { font-family:'Nanum Myeongjo',serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+  .section-label { font-family:Nanum Myeongjo,serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
   .section-label .sub { font-family:'Noto Sans KR',sans-serif; font-size:11px; font-weight:400; color:var(--ink-muted); }
 
   /* PROGRESS */
@@ -170,7 +170,7 @@
   .modal { background:var(--cream); width:100%; max-width:520px; border-radius:20px 20px 0 0; padding:22px 18px 34px; max-height:90vh; overflow-y:auto; animation:slideUp .26s cubic-bezier(.22,.68,0,1.2); }
   @keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
   .modal-handle { width:38px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 18px; }
-  .modal-title { font-family:'Nanum Myeongjo',serif; font-size:19px; font-weight:800; margin-bottom:18px; color:var(--ink); }
+  .modal-title { font-family:Nanum Myeongjo,serif; font-size:19px; font-weight:800; margin-bottom:18px; color:var(--ink); }
 
   /* CONFIRM */
   .confirm-overlay { display:none; position:fixed; inset:0; background:rgba(42,31,20,.5); z-index:500; align-items:center; justify-content:center; padding:18px; }
@@ -216,7 +216,7 @@
   .crop-overlay { display:none; position:fixed; inset:0; background:rgba(42,31,20,.7); z-index:600; align-items:center; justify-content:center; padding:16px; }
   .crop-overlay.on { display:flex; }
   .crop-box { background:var(--cream); border-radius:18px; padding:20px 16px 18px; width:100%; max-width:380px; }
-  .crop-title { font-family:'Nanum Myeongjo',serif; font-size:17px; font-weight:800; color:var(--ink); margin-bottom:14px; text-align:center; }
+  .crop-title { font-family:Nanum Myeongjo,serif; font-size:17px; font-weight:800; color:var(--ink); margin-bottom:14px; text-align:center; }
   .crop-stage { position:relative; width:100%; aspect-ratio:1; background:#111; border-radius:12px; overflow:hidden; touch-action:none; cursor:grab; }
   .crop-stage:active { cursor:grabbing; }
   .crop-stage img { position:absolute; transform-origin:0 0; user-select:none; pointer-events:none; }
@@ -422,36 +422,39 @@
      SUPABASE  ←  여기에 본인 프로젝트 URL과 anon key를 입력하세요
      ───────────────────────────────────────────────────────── -->
 <script>
-// Supabase 동적 로드 — CDN 연결 실패 시 안내
-(function() {
+const SUPABASE_URL = 'https://ywkzusdvnuuvqsoujupx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3a3p1c2R2bnV1dnFzb3VqdXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjkxNjIsImV4cCI6MjA4OTc0NTE2Mn0.zfhtFMusiFiVXUxixqaQoOuhPCFoduEGmaoUcJ4wTGo';
+let sb = null;
+
+// Supabase를 로드한 뒤 앱 초기화
+(function loadSupabase() {
   const URLS = [
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js',
     'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js'
   ];
   let idx = 0;
-  function tryLoad() {
+  function tryNext() {
     if (idx >= URLS.length) {
       document.getElementById('loading').innerHTML =
-        '<div style="text-align:center;padding:2rem;color:var(--accent)">' +
-        '<div style="font-size:2rem;margin-bottom:1rem">⚠️</div>' +
-        '<div style="font-family:'Nanum Myeongjo',serif;font-size:1.2rem;font-weight:800;margin-bottom:.5rem">네트워크 오류</div>' +
-        '<div style="font-size:.85rem;color:var(--ink-muted)">Supabase 라이브러리를 불러오지 못했어요.<br>인터넷 연결을 확인하고 새로고침 해주세요.</div></div>';
+        '<div style="text-align:center;padding:2rem">' +
+        '<div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div>' +
+        '<div style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem;color:#D4572A">네트워크 오류</div>' +
+        '<div style="font-size:.85rem;color:#9B856C">인터넷 연결을 확인하고<br>새로고침 해주세요.</div></div>';
       return;
     }
     const s = document.createElement('script');
     s.src = URLS[idx];
-    s.onload = function() { window._supabaseLoaded = true; };
-    s.onerror = function() { idx++; tryLoad(); };
+    s.onload = function() {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      initApp(); // 로드 완료 후 앱 시작
+    };
+    s.onerror = function() { idx++; tryNext(); };
     document.head.appendChild(s);
   }
-  tryLoad();
+  tryNext();
 })();
-</script>
-<script>
-const SUPABASE_URL = 'https://ywkzusdvnuuvqsoujupx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3a3p1c2R2bnV1dnFzb3VqdXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjkxNjIsImV4cCI6MjA4OTc0NTE2Mn0.zfhtFMusiFiVXUxixqaQoOuhPCFoduEGmaoUcJ4wTGo';
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+function initApp() {
 
 // ── CONSTANTS ────────────────────────────────────────────
 const EMOJIS = ['🐱','🐈','🐈‍⬛','😸','😺','😻','🦁','🐯','🐾'];
@@ -1109,6 +1112,7 @@ function applyCrop(){
   showPhotoPreview(croppedDataUrl);
   closeCropModal();
 }
+} // end initApp
 </script>
 </body>
 </html>
