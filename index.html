@@ -245,15 +245,17 @@
     </div>
     <div class="msg err" id="auth-err"></div>
     <div class="msg ok" id="auth-ok"></div>
+    <form onsubmit="doAuth();return false;" autocomplete="on">
     <div class="form-group">
       <label class="form-label">이메일</label>
-      <input class="form-input" type="email" id="a-email" placeholder="cat@example.com" onkeydown="if(event.key==='Enter')doAuth()">
+      <input class="form-input" type="email" id="a-email" placeholder="cat@example.com" autocomplete="email">
     </div>
     <div class="form-group">
       <label class="form-label">비밀번호</label>
-      <input class="form-input" type="password" id="a-pw" placeholder="6자 이상" onkeydown="if(event.key==='Enter')doAuth()">
+      <input class="form-input" type="password" id="a-pw" placeholder="6자 이상" autocomplete="current-password">
     </div>
-    <button class="btn-full btn-primary" id="auth-btn" onclick="doAuth()">로그인</button>
+    <button type="submit" class="btn-full btn-primary" id="auth-btn">로그인</button>
+    </form>
     <div class="auth-divider" style="margin:.9rem 0;font-size:.75rem;color:var(--ink-muted)">또는</div>
     <button class="btn-full" style="background:var(--warm-white);border:1.5px solid var(--border);color:var(--ink-light);border-radius:10px;font-size:.82rem;font-family:'Noto Sans KR',sans-serif;cursor:pointer;font-weight:500" onclick="doGuest()">🐾 게스트로 체험하기</button>
     <div style="font-size:.68rem;color:var(--ink-muted);text-align:center;margin-top:.6rem;line-height:1.6">게스트는 이 기기에만 저장됩니다</div>
@@ -419,7 +421,32 @@
 <!-- ─────────────────────────────────────────────────────────
      SUPABASE  ←  여기에 본인 프로젝트 URL과 anon key를 입력하세요
      ───────────────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+<script>
+// Supabase 동적 로드 — CDN 연결 실패 시 안내
+(function() {
+  const URLS = [
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js',
+    'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js'
+  ];
+  let idx = 0;
+  function tryLoad() {
+    if (idx >= URLS.length) {
+      document.getElementById('loading').innerHTML =
+        '<div style="text-align:center;padding:2rem;color:var(--accent)">' +
+        '<div style="font-size:2rem;margin-bottom:1rem">⚠️</div>' +
+        '<div style="font-family:'Nanum Myeongjo',serif;font-size:1.2rem;font-weight:800;margin-bottom:.5rem">네트워크 오류</div>' +
+        '<div style="font-size:.85rem;color:var(--ink-muted)">Supabase 라이브러리를 불러오지 못했어요.<br>인터넷 연결을 확인하고 새로고침 해주세요.</div></div>';
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = URLS[idx];
+    s.onload = function() { window._supabaseLoaded = true; };
+    s.onerror = function() { idx++; tryLoad(); };
+    document.head.appendChild(s);
+  }
+  tryLoad();
+})();
+</script>
 <script>
 const SUPABASE_URL = 'https://ywkzusdvnuuvqsoujupx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3a3p1c2R2bnV1dnFzb3VqdXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjkxNjIsImV4cCI6MjA4OTc0NTE2Mn0.zfhtFMusiFiVXUxixqaQoOuhPCFoduEGmaoUcJ4wTGo';
