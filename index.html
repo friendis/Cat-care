@@ -426,8 +426,27 @@ const SUPABASE_URL = 'https://ywkzusdvnuuvqsoujupx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3a3p1c2R2bnV1dnFzb3VqdXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjkxNjIsImV4cCI6MjA4OTc0NTE2Mn0.zfhtFMusiFiVXUxixqaQoOuhPCFoduEGmaoUcJ4wTGo';
 let sb = null;
 
-// Supabase를 로드한 뒤 앱 초기화
-(function loadSupabase() {
+// Supabase 로드 후 앱 초기화 — DOM ready와 supabase load 둘 다 기다림
+(function() {
+  let domReady = false;
+  let sbReady = false;
+
+  function tryInit() {
+    if (!domReady || !sbReady) return;
+    // 둘 다 준비됐을 때 앱 시작
+    initApp();
+  }
+
+  // 1. DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      domReady = true; tryInit();
+    });
+  } else {
+    domReady = true;
+  }
+
+  // 2. Supabase 로드
   const URLS = [
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js',
     'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js'
@@ -446,7 +465,7 @@ let sb = null;
     s.src = URLS[idx];
     s.onload = function() {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      initApp(); // 로드 완료 후 앱 시작
+      sbReady = true; tryInit();
     };
     s.onerror = function() { idx++; tryNext(); };
     document.head.appendChild(s);
@@ -455,6 +474,7 @@ let sb = null;
 })();
 
 function initApp() {
+
 
 // ── CONSTANTS ────────────────────────────────────────────
 const EMOJIS = ['🐱','🐈','🐈‍⬛','😸','😺','😻','🦁','🐯','🐾'];
@@ -622,7 +642,6 @@ async function dbUpsertLog(itemId,date,done){
 }
 
 // ── INIT ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',()=>{
   // emoji picker
   const ep=document.getElementById('emojiPicker');
   EMOJIS.forEach((e,i)=>{
@@ -645,7 +664,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       else if(event==='SIGNED_OUT'){user=null;}
     });
   })();
-});
 
 // ── TABS ──────────────────────────────────────────────────
 function showTab(t){
@@ -1112,6 +1130,7 @@ function applyCrop(){
   showPhotoPreview(croppedDataUrl);
   closeCropModal();
 }
+
 } // end initApp
 </script>
 </body>
