@@ -200,6 +200,25 @@
   .emoji-opt { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:21px; border:2px solid var(--border); cursor:pointer; background:var(--warm-white); transition:all .13px; }
   .emoji-opt.on { border-color:var(--ink); background:var(--cream); }
 
+  /* ── MEMO / CONDITION ── */
+  .condition-chips { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
+  .cond-chip { padding:7px 12px; border:1.5px solid var(--border); border-radius:999px; font-size:13px; cursor:pointer; background:var(--warm-white); color:var(--ink-light); transition:all .15s; display:flex; align-items:center; gap:5px; }
+  .cond-chip.on { background:var(--ink); border-color:var(--ink); color:var(--cream); }
+  .memo-textarea { width:100%; padding:10px 13px; border:1.5px solid var(--border); border-radius:9px; font-size:13px; font-family:'Noto Sans KR',sans-serif; background:var(--warm-white); color:var(--ink); outline:none; resize:none; height:80px; line-height:1.6; transition:border-color .15s; }
+  .memo-textarea:focus { border-color:var(--ink); }
+  .log-memo { font-size:11.5px; color:var(--ink-muted); margin-top:4px; padding:5px 8px; background:var(--cream); border-radius:6px; border-left:2px solid var(--border); line-height:1.5; }
+  .log-cond { font-size:11px; margin-top:3px; }
+  .memo-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; background:var(--gold); }
+  .today-memo-wrap { background:var(--warm-white); border:1px solid var(--border); border-radius:13px; padding:13px 14px; margin-bottom:14px; }
+  .today-memo-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .today-memo-title { font-size:12.5px; font-weight:600; color:var(--ink); }
+  .today-memo-date { font-size:11px; color:var(--ink-muted); }
+  .today-memo-content { font-size:12.5px; color:var(--ink-light); line-height:1.6; }
+  .today-memo-cond { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+  .cond-badge { padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:500; background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold-soft); }
+  .btn-memo-add { background:none; border:1.5px dashed var(--border); border-radius:9px; color:var(--ink-muted); font-size:12px; font-family:'Noto Sans KR',sans-serif; padding:8px 12px; cursor:pointer; width:100%; transition:all .15s; text-align:left; }
+  .btn-memo-add:hover { border-color:var(--ink-muted); color:var(--ink); }
+
   /* ── PHOTO UPLOAD ── */
   .photo-upload-area { border:2px dashed var(--border); border-radius:11px; padding:18px; text-align:center; cursor:pointer; transition:all .18s; color:var(--ink-muted); font-size:13px; background:var(--warm-white); margin-bottom:10px; }
   .photo-upload-area:hover { border-color:var(--ink-muted); }
@@ -292,6 +311,7 @@
 
   <div class="section on" id="sec-today">
     <div id="todayProg"></div>
+    <div id="todayMemoWrap"></div>
     <div class="section-label">오늘 복용 일정 <span class="sub" id="todayDateLbl"></span></div>
     <div class="schedule-list" id="todayList"></div>
   </div>
@@ -304,6 +324,7 @@
   <div class="section" id="sec-log">
     <div class="section-label">복용 기록</div>
     <div class="cal-strip" id="calStrip"></div>
+    <div id="logMemoWrap"></div>
     <div id="logList"></div>
   </div>
 
@@ -406,6 +427,35 @@
   </div>
 </div>
 
+<!-- MEMO MODAL -->
+<div class="modal-overlay" id="memoModal" onclick="if(event.target===this)closeMemoModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="memoModalTitle">오늘의 컨디션</div>
+    <div class="form-group">
+      <label class="form-label">컨디션</label>
+      <div class="condition-chips" id="condChips">
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="😸 활발함">😸 활발함</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="😺 평소대로">😺 평소대로</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="😿 기운없음">😿 기운없음</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="🤒 아픔">🤒 아픔</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="🍽️ 식욕저하">🍽️ 식욕저하</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="💤 많이잠">💤 많이잠</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="🚽 구토">🚽 구토</div>
+        <div class="cond-chip" onclick="toggleCond(this)" data-v="✨ 상태좋음">✨ 상태좋음</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모</label>
+      <textarea class="memo-textarea" id="memoText" placeholder="오늘 냥이 상태를 자유롭게 기록해보세요"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-cancel" onclick="closeMemoModal()">취소</button>
+      <button class="btn btn-save" onclick="saveMemo()" style="flex:2">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM -->
 <div class="confirm-overlay" id="cfOverlay">
   <div class="confirm-box">
@@ -481,7 +531,7 @@ function showTab(t){
   });
   if(t==='log')renderLog();
 }
-function renderAll(){renderToday();renderManage();}
+function renderAll(){renderToday();renderManage();renderTodayMemo();}
 
 // ── CAT BAR ───────────────────────────────────────────────
 let editCatId=null;
@@ -709,8 +759,125 @@ function renderManage(){
 
 // ── LOG ───────────────────────────────────────────────────
 let selDate=todayStr();
+// ── DAILY MEMO ───────────────────────────────────────────
+let memoTargetDate = null;
+let selectedConds = [];
+
+function getDailyMemo(ds){
+  if(isGuest) return G.logs.find(l=>l.cat===G.activeCat&&l.type==='daily_memo'&&l.date===ds)||null;
+  return D.logs.find(l=>l.log_type==='daily_memo'&&l.log_date===ds&&l.cat_id===getActiveCat())||null;
+}
+
+function renderTodayMemo(){
+  const ds=todayStr();
+  const wrap=document.getElementById('todayMemoWrap');
+  if(!wrap)return;
+  const memo=getDailyMemo(ds);
+  if(memo){
+    const conds=memo.conditions||memo.condition||'';
+    const txt=memo.memo_text||memo.memo||'';
+    const condArr=conds?conds.split(',').filter(Boolean):[];
+    wrap.innerHTML=`<div class="today-memo-wrap">
+      <div class="today-memo-header">
+        <span class="today-memo-title">📝 오늘의 컨디션</span>
+        <button onclick="openMemoModal('${ds}')" style="background:none;border:none;font-size:12px;color:var(--ink-muted);cursor:pointer">수정</button>
+      </div>
+      <div class="today-memo-cond">${condArr.map(c=>`<span class="cond-badge">${c}</span>`).join('')}</div>
+      ${txt?`<div class="today-memo-content">${txt}</div>`:''}
+    </div>`;
+  } else {
+    wrap.innerHTML=`<button class="btn-memo-add" onclick="openMemoModal('${ds}')">📝 오늘의 컨디션 기록하기</button>`;
+  }
+}
+
+function renderLogMemo(){
+  const wrap=document.getElementById('logMemoWrap');
+  if(!wrap)return;
+  const memo=getDailyMemo(selDate);
+  if(memo){
+    const conds=memo.conditions||memo.condition||'';
+    const txt=memo.memo_text||memo.memo||'';
+    const condArr=conds?conds.split(',').filter(Boolean):[];
+    wrap.innerHTML=`<div class="today-memo-wrap" style="margin-bottom:12px">
+      <div class="today-memo-header">
+        <span class="today-memo-title">📝 컨디션 메모</span>
+        <button onclick="openMemoModal('${selDate}')" style="background:none;border:none;font-size:12px;color:var(--ink-muted);cursor:pointer">수정</button>
+      </div>
+      <div class="today-memo-cond">${condArr.map(c=>`<span class="cond-badge">${c}</span>`).join('')}</div>
+      ${txt?`<div class="today-memo-content">${txt}</div>`:''}
+    </div>`;
+  } else {
+    wrap.innerHTML=`<button class="btn-memo-add" onclick="openMemoModal('${selDate}')" style="margin-bottom:12px">📝 이 날의 컨디션 기록하기</button>`;
+  }
+}
+
+function openMemoModal(ds){
+  memoTargetDate=ds;
+  selectedConds=[];
+  document.getElementById('memoModalTitle').textContent=fmtDate(ds)+' 컨디션';
+  document.getElementById('memoText').value='';
+  document.querySelectorAll('.cond-chip').forEach(c=>c.classList.remove('on'));
+  // 기존 메모 불러오기
+  const existing=getDailyMemo(ds);
+  if(existing){
+    const conds=existing.conditions||existing.condition||'';
+    const txt=existing.memo_text||existing.memo||'';
+    selectedConds=conds?conds.split(',').filter(Boolean):[];
+    document.getElementById('memoText').value=txt;
+    selectedConds.forEach(cv=>{
+      const chip=document.querySelector(`.cond-chip[data-v="${cv}"]`);
+      if(chip)chip.classList.add('on');
+    });
+  }
+  document.getElementById('memoModal').classList.add('on');
+}
+
+function closeMemoModal(){document.getElementById('memoModal').classList.remove('on');}
+
+function toggleCond(el){
+  el.classList.toggle('on');
+  const v=el.dataset.v;
+  selectedConds=el.classList.contains('on')?[...selectedConds,v]:selectedConds.filter(c=>c!==v);
+}
+
+async function saveMemo(){
+  const ds=memoTargetDate;
+  const txt=document.getElementById('memoText').value.trim();
+  const conds=selectedConds.join(',');
+  const catId=getActiveCat();
+
+  if(!isGuest){
+    sync('busy');
+    try{
+      const existing=D.logs.find(l=>l.log_type==='daily_memo'&&l.log_date===ds&&l.cat_id===catId);
+      if(existing){
+        await sb.from('logs').update({memo_text:txt,conditions:conds}).eq('id',existing.id);
+        existing.memo_text=txt; existing.conditions=conds;
+      } else {
+        const{data,error}=await sb.from('logs').insert({
+          user_id:user.id, cat_id:catId, log_type:'daily_memo',
+          log_date:ds, done:true, memo_text:txt, conditions:conds
+        }).select().single();
+        if(error)throw error;
+        D.logs.push(data);
+      }
+      sync('ok');
+    }catch(e){toast('저장 실패');sync('err');return;}
+  } else {
+    const idx=G.logs.findIndex(l=>l.cat===G.activeCat&&l.type==='daily_memo'&&l.date===ds);
+    if(idx>=0){G.logs[idx].memo=txt;G.logs[idx].condition=conds;}
+    else G.logs.push({id:G.nid++,cat:G.activeCat,type:'daily_memo',date:ds,done:true,memo:txt,condition:conds});
+    saveGuest();
+  }
+  closeMemoModal();
+  renderTodayMemo();
+  renderLogMemo();
+  toast('메모 저장됨');
+}
+
 function renderLog(){
   renderCalStrip();
+  renderLogMemo();
   const list=document.getElementById('logList');
   const activeCat2=getActiveCat();
   const items=getItems().filter(i=>(i.cat_id||i.catId)===activeCat2&&isDue(i,selDate));
