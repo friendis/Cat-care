@@ -317,6 +317,23 @@
   .lightbox-close { position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:22px; width:38px; height:38px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .log-section-label { font-size:11px; font-weight:600; color:var(--ink-muted); letter-spacing:.12em; text-transform:uppercase; margin:14px 0 8px; display:flex; align-items:center; gap:.5rem; }
   .log-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── WEIGHT CHART ── */
+  .weight-chart-wrap { margin:10px 0 4px; }
+  .weight-chart-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
+  .weight-chart-title { font-size:11px; font-weight:600; color:var(--ink-muted); letter-spacing:.12em; text-transform:uppercase; }
+  .weight-latest { font-size:18px; font-weight:700; color:var(--ink); font-family:'Noto Sans KR',sans-serif; }
+  .weight-latest span { font-size:11px; color:var(--ink-muted); font-weight:400; margin-left:2px; }
+  .weight-change { font-size:11px; font-weight:600; padding:2px 7px; border-radius:999px; }
+  .weight-change.up { color:var(--accent); background:var(--accent-soft); }
+  .weight-change.dn { color:var(--mint); background:var(--mint-soft); }
+  .weight-change.eq { color:var(--ink-muted); background:var(--cream); }
+  .weight-svg-wrap { width:100%; overflow:hidden; border-radius:8px; }
+  .weight-no-data { font-size:12px; color:var(--ink-muted); text-align:center; padding:12px 0; }
+  .weight-entry-row { display:flex; align-items:center; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--border); font-size:12.5px; }
+  .weight-entry-row:last-child { border-bottom:none; }
+  .weight-entry-date { color:var(--ink-muted); }
+  .weight-entry-val { font-weight:600; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -570,6 +587,13 @@
       <label class="form-label">날짜</label>
       <input type="date" class="form-input" id="eventDate">
     </div>
+    <div class="form-group" id="weightGroup" style="display:none">
+      <label class="form-label">체중 (kg)</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="number" class="form-input" id="eventWeight" placeholder="예: 4.2" step="0.01" min="0" max="30" style="max-width:130px">
+        <span style="font-size:13px;color:var(--ink-muted)">kg</span>
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">메모</label>
       <textarea class="memo-textarea" id="eventMemo" placeholder="내용을 자유롭게 기록해보세요"></textarea>
@@ -706,64 +730,30 @@ function renderDashboard(){
   if(!wrap)return;
   const cats=getCats();
   if(cats.length===0){wrap.innerHTML='<div class="dash-empty">등록된 고양이가 없어요</div>';return;}
-
   const days=['일','월','화','수','목','금','토'];
   const td=todayStr();
-
-  // 최근 7일 날짜 배열
   const dates=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-i);
-    dates.push(`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`);
-  }
-
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);dates.push(`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`);}
   wrap.innerHTML='';
-
   cats.forEach(cat=>{
     const catId=cat.id;
-    const card=document.createElement('div');
-    card.className='dash-cat-card';
-
-    // 아바타
-    const avatarHtml=cat.photo_url
-      ?`<div class="dash-cat-avatar"><img src="${cat.photo_url}" alt="${cat.name}"></div>`
-      :`<div class="dash-cat-avatar">${cat.emoji}</div>`;
-
-    // 이번 주 복용률 계산
+    const card=document.createElement('div');card.className='dash-cat-card';
+    // ── 헤더 ──
     let totalDue=0,totalDone=0;
-    dates.forEach(ds=>{
-      const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));
-      totalDue+=items.length;
-      totalDone+=items.filter(i=>isLogDone(i.id,ds)).length;
-    });
+    dates.forEach(ds=>{const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));totalDue+=items.length;totalDone+=items.filter(i=>isLogDone(i.id,ds)).length;});
     const pct=totalDue>0?Math.round(totalDone/totalDue*100):null;
-
-    card.innerHTML=`
-      ${avatarHtml}
-      <div style="flex:1;min-width:0">
-        <div class="dash-cat-name">${cat.name}</div>
-        <div class="dash-cat-sub">${pct!==null?'이번 주 복용률 '+pct+'%':'등록된 약 없음'}</div>
-      </div>`;
-    card.querySelector('.dash-cat-avatar').after(...[]);
-    // rebuild properly
-    const header=document.createElement('div');
-    header.className='dash-cat-header';
-    if(cat.photo_url){
-      const av=document.createElement('div');av.className='dash-cat-avatar';
-      const im=document.createElement('img');im.src=cat.photo_url;im.alt=cat.name;
-      av.appendChild(im);header.appendChild(av);
-    } else {
-      const av=document.createElement('div');av.className='dash-cat-avatar';av.textContent=cat.emoji;header.appendChild(av);
-    }
+    const header=document.createElement('div');header.className='dash-cat-header';
+    const av=document.createElement('div');av.className='dash-cat-avatar';
+    if(cat.photo_url){const im=document.createElement('img');im.src=cat.photo_url;im.alt=cat.name;av.appendChild(im);}else{av.textContent=cat.emoji;}
+    header.appendChild(av);
     const info=document.createElement('div');info.style.flex='1';
     info.innerHTML=`<div class="dash-cat-name">${cat.name}</div><div class="dash-cat-sub">${pct!==null?'이번 주 복용률 '+pct+'%':'등록된 약 없음'}</div>`;
     header.appendChild(info);
-    card.innerHTML='';
     card.appendChild(header);
 
-    // 주간 바 차트
+    // ── 주간 복용 바 차트 ──
     const weekWrap=document.createElement('div');
-    weekWrap.innerHTML='<div class="dash-legend"><span class="dash-legend-dot" style="background:var(--mint)"></span>완료 <span class="dash-legend-dot" style="background:var(--gold)"></span>컨디션메모</div>';
+    weekWrap.innerHTML='<div class="dash-legend"><span class="dash-legend-dot" style="background:var(--mint)"></span>완료&nbsp; <span class="dash-legend-dot" style="background:var(--gold)"></span>컨디션메모</div>';
     const weekRow=document.createElement('div');weekRow.className='dash-week';
     dates.forEach(ds=>{
       const d=new Date(ds);
@@ -775,30 +765,51 @@ function renderDashboard(){
       const condArr=memo?(memo.conditions||memo.condition||'').split(',').filter(Boolean):[];
       const condEmoji=condArr.length>0?condArr[0].split(' ')[0]:'';
       const isToday=ds===td;
-
       const col=total===0?'var(--border)':ratio===1?'var(--mint)':ratio>0?'var(--gold)':'var(--accent-soft)';
       const height=total===0?6:Math.max(6,Math.round(ratio*40)+6);
-
       const dayEl=document.createElement('div');dayEl.className='dash-day';
-      dayEl.innerHTML=`
-        <div class="dash-day-cond">${condEmoji}</div>
-        <div class="dash-day-bar" style="height:${height}px;background:${col}"></div>
-        <div class="dash-day-num${isToday?' today-num':''}">${d.getDate()}</div>
-        <div class="dash-day-lbl">${days[d.getDay()]}</div>`;
+      dayEl.innerHTML=`<div class="dash-day-cond">${condEmoji}</div><div class="dash-day-bar" style="height:${height}px;background:${col}"></div><div class="dash-day-num${isToday?' today-num':''}">${d.getDate()}</div><div class="dash-day-lbl">${days[d.getDay()]}</div>`;
       weekRow.appendChild(dayEl);
     });
     weekWrap.appendChild(weekRow);
     card.appendChild(weekWrap);
 
-    // 최근 기록 리스트 (컨디션 + 복용 미완료)
+    // ── 체중 그래프 ──
+    const weightEvs=getEvents().filter(e=>String(e.cat_id||e.cat)===String(catId)&&(e.event_type||e.type)==='weight'&&e.weight!=null)
+      .sort((a,b)=>((a.event_date||a.date)||'').localeCompare((b.event_date||b.date)||''));
+    const weightWrap=document.createElement('div');weightWrap.className='weight-chart-wrap';
+    if(weightEvs.length>=2){
+      const latest=weightEvs[weightEvs.length-1];
+      const prev=weightEvs[weightEvs.length-2];
+      const diff=(parseFloat(latest.weight)-parseFloat(prev.weight)).toFixed(2);
+      const diffAbs=Math.abs(diff);
+      const changeClass=diff>0?'up':diff<0?'dn':'eq';
+      const changeLabel=diff>0?`+${diffAbs}kg`:diff<0?`-${diffAbs}kg`:'변동없음';
+      weightWrap.innerHTML=`<div class="weight-chart-header">
+        <span class="weight-chart-title">⚖️ 체중 변화</span>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span class="weight-latest">${parseFloat(latest.weight).toFixed(2)}<span>kg</span></span>
+          <span class="weight-change ${changeClass}">${changeLabel}</span>
+        </div>
+      </div>`;
+      // SVG 선 그래프
+      const svgEl=buildWeightSvg(weightEvs);
+      weightWrap.appendChild(svgEl);
+    } else if(weightEvs.length===1){
+      const only=weightEvs[0];
+      weightWrap.innerHTML=`<div class="weight-chart-header"><span class="weight-chart-title">⚖️ 체중</span><span class="weight-latest">${parseFloat(only.weight).toFixed(2)}<span>kg</span></span></div><div class="weight-no-data">기록이 2개 이상이면 그래프가 표시돼요</div>`;
+    } else {
+      weightWrap.innerHTML=`<div class="weight-chart-title" style="color:var(--ink-muted);font-size:11px">⚖️ 체중 기록 없음</div><div class="weight-no-data">이벤트 탭에서 체중 측정을 기록해보세요</div>`;
+    }
+    card.appendChild(weightWrap);
+
+    // ── 최근 기록 리스트 ──
     const listWrap=document.createElement('div');listWrap.className='dash-section';
     const listTitle=document.createElement('div');
-    listTitle.style.cssText='font-size:11px;color:var(--ink-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:600';
+    listTitle.style.cssText='font-size:11px;color:var(--ink-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:600;margin-top:10px';
     listTitle.textContent='최근 기록';
     listWrap.appendChild(listTitle);
-
     let hasEntry=false;
-    // 날짜 역순으로
     [...dates].reverse().forEach(ds=>{
       const d=new Date(ds);
       const dateStr=(ds===td?'오늘':`${d.getMonth()+1}/${d.getDate()}`);
@@ -806,43 +817,69 @@ function renderDashboard(){
       const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));
       const doneItems=items.filter(i=>isLogDone(i.id,ds));
       const missItems=items.filter(i=>!isLogDone(i.id,ds));
-
-      // 컨디션 메모
       if(memo){
         const conds=(memo.conditions||memo.condition||'').split(',').filter(Boolean);
         const txt=memo.memo_text||memo.memo||'';
         const row=document.createElement('div');row.className='dash-row';
-        row.innerHTML=`<div class="dash-dot memo"></div>
-          <div class="dash-entry"><span class="dash-date">${dateStr}</span>
-          ${conds.map(c=>`<span class="dash-cond-pill">${c}</span>`).join('')}
-          ${txt?`<span style="color:var(--ink-muted)">${txt}</span>`:''}
-          </div>`;
+        row.innerHTML=`<div class="dash-dot memo"></div><div class="dash-entry"><span class="dash-date">${dateStr}</span>${conds.map(c=>`<span class="dash-cond-pill">${c}</span>`).join('')}${txt?`<span style="color:var(--ink-muted)">${txt}</span>`:''}</div>`;
         listWrap.appendChild(row);hasEntry=true;
       }
-
-      // 완료 항목 (간략히)
       if(doneItems.length>0){
         const row=document.createElement('div');row.className='dash-row';
-        row.innerHTML=`<div class="dash-dot done"></div>
-          <div class="dash-entry"><span class="dash-date">${dateStr}</span>${doneItems.map(i=>i.name).join(', ')} 복용 완료</div>`;
+        row.innerHTML=`<div class="dash-dot done"></div><div class="dash-entry"><span class="dash-date">${dateStr}</span>${doneItems.map(i=>i.name).join(', ')} 복용 완료</div>`;
         listWrap.appendChild(row);hasEntry=true;
       }
-
-      // 미복용 항목
       if(missItems.length>0&&ds!==td){
         const row=document.createElement('div');row.className='dash-row';
-        row.innerHTML=`<div class="dash-dot miss"></div>
-          <div class="dash-entry"><span class="dash-date">${dateStr}</span>${missItems.map(i=>i.name).join(', ')} 미복용</div>`;
+        row.innerHTML=`<div class="dash-dot miss"></div><div class="dash-entry"><span class="dash-date">${dateStr}</span>${missItems.map(i=>i.name).join(', ')} 미복용</div>`;
         listWrap.appendChild(row);hasEntry=true;
       }
     });
-
-    if(!hasEntry){
-      listWrap.innerHTML+='<div class="dash-empty" style="padding:10px">최근 기록이 없어요</div>';
-    }
+    if(!hasEntry)listWrap.innerHTML+='<div class="dash-empty" style="padding:10px">최근 기록이 없어요</div>';
     card.appendChild(listWrap);
     wrap.appendChild(card);
   });
+}
+
+function buildWeightSvg(evs){
+  const W=320,H=90,PL=40,PR=12,PT=10,PB=24;
+  const vals=evs.map(e=>parseFloat(e.weight));
+  const dates=evs.map(e=>e.event_date||e.date||'');
+  const minV=Math.min(...vals),maxV=Math.max(...vals);
+  const range=maxV-minV||0.5;
+  const padded_min=minV-range*0.15, padded_max=maxV+range*0.15;
+  const toX=i=>PL+(W-PL-PR)*i/(evs.length-1);
+  const toY=v=>PT+(H-PT-PB)*(1-(v-padded_min)/(padded_max-padded_min));
+  const points=vals.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`);
+  const pathD='M'+points.join('L');
+  const fillD=pathD+`L${toX(evs.length-1).toFixed(1)},${H-PB} L${PL},${H-PB} Z`;
+  // x축 레이블: 최대 5개
+  const step=Math.ceil(evs.length/5);
+  let labels='';
+  evs.forEach((e,i)=>{
+    if(i%step===0||i===evs.length-1){
+      const ds=dates[i];const parts=ds.split('-');
+      const lbl=parts.length>=3?`${+parts[1]}/${+parts[2]}`:ds;
+      labels+=`<text x="${toX(i).toFixed(1)}" y="${H}" text-anchor="middle" font-size="9" fill="#9B856C">${lbl}</text>`;
+    }
+  });
+  // y축 레이블: min, max
+  const yLabels=`
+    <text x="${PL-4}" y="${(toY(maxV)+4).toFixed(1)}" text-anchor="end" font-size="9" fill="#9B856C">${maxV.toFixed(1)}</text>
+    <text x="${PL-4}" y="${(toY(minV)+4).toFixed(1)}" text-anchor="end" font-size="9" fill="#9B856C">${minV.toFixed(1)}</text>`;
+  // 데이터 포인트
+  const dots=vals.map((v,i)=>`<circle cx="${toX(i).toFixed(1)}" cy="${toY(v).toFixed(1)}" r="3" fill="#4A8C7A" stroke="#FFF9F2" stroke-width="1.5"/>`).join('');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height',H);
+  svg.style.display='block';
+  svg.innerHTML=`
+    <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A8C7A" stop-opacity="0.18"/><stop offset="100%" stop-color="#4A8C7A" stop-opacity="0"/></linearGradient></defs>
+    <path d="${fillD}" fill="url(#wg)"/>
+    <path d="${pathD}" fill="none" stroke="#4A8C7A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}${labels}${yLabels}`;
+  return svg;
 }
 
 // 특정 고양이의 daily memo 조회 (catId 명시)
@@ -873,6 +910,8 @@ function setEventType(el,t){
   curEventType=t;
   document.querySelectorAll('.event-type-btn').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
+  const wg=document.getElementById('weightGroup');
+  if(wg) wg.style.display=t==='weight'?'block':'none';
 }
 
 function openEventModal(ds){
@@ -881,6 +920,8 @@ function openEventModal(ds){
   document.getElementById('eventSaveBtn').textContent='저장';
   document.getElementById('eventMemo').value='';
   document.getElementById('eventDate').value=ds||selDate||todayStr();
+  document.getElementById('eventWeight').value='';
+  document.getElementById('weightGroup').style.display='none';
   document.querySelectorAll('.event-type-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
   curEventType='hospital';
   document.getElementById('eventDeleteBtn')?.remove();
@@ -895,6 +936,8 @@ function openEditEvent(id){
   document.getElementById('eventSaveBtn').textContent='수정 저장';
   document.getElementById('eventMemo').value=ev.memo||ev.memo_text||'';
   document.getElementById('eventDate').value=ev.event_date||ev.date||todayStr();
+  document.getElementById('eventWeight').value=ev.weight||'';
+  document.getElementById('weightGroup').style.display=curEventType==='weight'?'block':'none';
   document.querySelectorAll('.event-type-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===curEventType));
   // 기존 사진 로드
   eventPhotos=(ev.photos||[]).map(url=>({url,isNew:false}));
@@ -966,7 +1009,8 @@ async function saveEvent(){
     photoUrls=[...photoUrls,...eventPhotos.filter(p=>p.isNew).map(p=>p.dataUrl)];
   }
 
-  const payload={cat_id:catId,event_type:curEventType,event_date:date,memo,photos:photoUrls};
+  const weightVal=curEventType==='weight'?parseFloat(document.getElementById('eventWeight').value)||null:null;
+  const payload={cat_id:catId,event_type:curEventType,event_date:date,memo,photos:photoUrls,weight:weightVal};
 
   if(!isGuest){
     sync('busy');
