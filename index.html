@@ -259,6 +259,64 @@
   .crop-hint { font-size:11.5px; color:var(--ink-muted); text-align:center; margin:10px 0 14px; }
   .crop-zoom { width:100%; margin-bottom:12px; accent-color:var(--accent); }
   .crop-btns { display:flex; gap:8px; }
+
+  /* ── DASHBOARD ── */
+  .dash-section { margin-bottom:20px; }
+  .dash-week { display:flex; gap:5px; margin-bottom:14px; }
+  .dash-day { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .dash-day-lbl { font-size:9.5px; color:var(--ink-muted); letter-spacing:.04em; }
+  .dash-day-num { font-size:12px; font-weight:600; color:var(--ink-light); }
+  .dash-day-num.today-num { color:var(--accent); }
+  .dash-day-bar { width:100%; border-radius:6px; min-height:6px; transition:all .3s; }
+  .dash-day-cond { font-size:14px; margin-top:2px; min-height:18px; }
+  .dash-cat-card { background:var(--warm-white); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; }
+  .dash-cat-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .dash-cat-avatar { width:38px; height:38px; border-radius:50%; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; overflow:hidden; }
+  .dash-cat-avatar img { width:100%; height:100%; object-fit:cover; }
+  .dash-cat-name { font-size:14px; font-weight:600; color:var(--ink); }
+  .dash-cat-sub { font-size:11px; color:var(--ink-muted); margin-top:1px; }
+  .dash-row { display:flex; gap:8px; margin-bottom:6px; align-items:flex-start; }
+  .dash-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+  .dash-dot.done { background:var(--mint); }
+  .dash-dot.miss { background:var(--accent); opacity:.45; }
+  .dash-dot.memo { background:var(--gold); }
+  .dash-entry { font-size:12.5px; color:var(--ink-light); line-height:1.5; flex:1; }
+  .dash-entry .dash-date { font-size:11px; color:var(--ink-muted); margin-right:5px; }
+  .dash-cond-pill { display:inline-block; background:var(--gold-soft); color:var(--gold); border-radius:999px; font-size:10.5px; padding:1px 7px; margin-right:3px; font-weight:500; }
+  .dash-empty { text-align:center; padding:20px; color:var(--ink-muted); font-size:13px; }
+  .dash-legend { display:flex; gap:12px; font-size:11px; color:var(--ink-muted); margin-bottom:8px; align-items:center; }
+  .dash-legend-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+  /* ── EVENTS ── */
+  .event-type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:4px; }
+  .event-type-btn { padding:10px 6px; border:1.5px solid var(--border); border-radius:10px; background:var(--warm-white); font-size:12px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; text-align:center; transition:all .15s; color:var(--ink-muted); display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .event-type-btn .et-icon { font-size:20px; }
+  .event-type-btn.on { background:var(--ink); border-color:var(--ink); color:var(--cream); }
+  .photo-grid { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+  .photo-thumb { position:relative; width:72px; height:72px; border-radius:9px; overflow:hidden; border:1px solid var(--border); }
+  .photo-thumb img { width:100%; height:100%; object-fit:cover; }
+  .photo-thumb .del-btn { position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,.55); color:#fff; font-size:10px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .photo-add-btn { width:72px; height:72px; border-radius:9px; border:1.5px dashed var(--border); background:var(--warm-white); font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink-muted); transition:all .15s; flex-shrink:0; }
+  .photo-add-btn:hover { border-color:var(--ink-muted); }
+  .event-card { background:var(--warm-white); border:1px solid var(--border); border-radius:13px; padding:12px 14px; margin-bottom:9px; }
+  .event-card-header { display:flex; align-items:center; gap:9px; margin-bottom:6px; }
+  .event-card-icon { width:34px; height:34px; border-radius:9px; background:var(--cream); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+  .event-card-meta { flex:1; min-width:0; }
+  .event-card-title { font-size:13.5px; font-weight:600; color:var(--ink); }
+  .event-card-time { font-size:11px; color:var(--ink-muted); margin-top:2px; }
+  .event-card-memo { font-size:12.5px; color:var(--ink-light); line-height:1.55; margin-bottom:8px; }
+  .event-photo-grid { display:flex; gap:6px; flex-wrap:wrap; }
+  .event-photo-grid img { width:64px; height:64px; border-radius:8px; object-fit:cover; border:1px solid var(--border); cursor:pointer; transition:opacity .15s; }
+  .event-photo-grid img:hover { opacity:.85; }
+  .event-edit-btn { background:none; border:none; font-size:14px; color:var(--ink-muted); cursor:pointer; padding:4px; transition:color .15s; }
+  .event-edit-btn:hover { color:var(--ink); }
+  /* 사진 라이트박스 */
+  .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:800; align-items:center; justify-content:center; }
+  .lightbox.on { display:flex; }
+  .lightbox img { max-width:94vw; max-height:88vh; border-radius:10px; object-fit:contain; }
+  .lightbox-close { position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:22px; width:38px; height:38px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .log-section-label { font-size:11px; font-weight:600; color:var(--ink-muted); letter-spacing:.12em; text-transform:uppercase; margin:14px 0 8px; display:flex; align-items:center; gap:.5rem; }
+  .log-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
 </style>
 </head>
 <body>
@@ -301,7 +359,7 @@
 <div id="app" style="display:none">
   <div class="header">
     <div>
-      <div class="header-title">냥이 <span>건강수첩</span></div>
+      <div class="header-title" onclick="showTab('dashboard')" style="cursor:pointer">냥이 <span>건강수첩</span></div>
     </div>
     <div class="header-right">
       <div class="sync-dot" id="syncDot"></div>
@@ -318,12 +376,18 @@
   </div>
 
   <div class="nav-tabs">
-    <button class="nav-tab on" id="tab-today" onclick="showTab('today')"><span class="icon">🌸</span>오늘일정</button>
+    <button class="nav-tab" id="tab-dashboard" onclick="showTab('dashboard')"><span class="icon">🏠</span>홈</button>
+    <button class="nav-tab on" id="tab-today" onclick="showTab('today')"><span class="icon">🌸</span>오늘</button>
     <button class="nav-tab" id="tab-manage" onclick="showTab('manage')"><span class="icon">💊</span>약 목록</button>
     <button class="nav-tab" id="tab-log" onclick="showTab('log')"><span class="icon">📋</span>기록</button>
+    <button class="nav-tab" id="tab-events" onclick="showTab('events')"><span class="icon">📸</span>이벤트</button>
   </div>
 
   <div class="cat-bar" id="catBar"></div>
+
+  <div class="section" id="sec-dashboard">
+    <div id="dashContent"></div>
+  </div>
 
   <div class="section on" id="sec-today">
     <div id="todayProg"></div>
@@ -338,13 +402,19 @@
   </div>
 
   <div class="section" id="sec-log">
-    <div class="section-label">복용 기록</div>
+    <div class="section-label">복약 기록</div>
     <div class="cal-strip" id="calStrip"></div>
     <div id="logMemoWrap"></div>
     <div id="logList"></div>
   </div>
 
-  <button class="fab" onclick="openAddModal()">＋</button>
+  <div class="section" id="sec-events">
+    <div class="section-label">이벤트 기록</div>
+    <div id="eventFilterBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <div id="eventList"></div>
+  </div>
+
+  <button class="fab" id="mainFab" onclick="onFabClick()">＋</button>
 </div>
 
 <!-- ITEM MODAL -->
@@ -480,6 +550,50 @@
   </div>
 </div>
 
+<!-- EVENT MODAL -->
+<div class="modal-overlay" id="eventModal" onclick="if(event.target===this)closeEventModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="eventModalTitle">이벤트 기록</div>
+    <div class="form-group">
+      <label class="form-label">종류</label>
+      <div class="event-type-grid" id="eventTypeGrid">
+        <button class="event-type-btn on" onclick="setEventType(this,'hospital')" data-t="hospital"><span class="et-icon">🏥</span>병원 방문</button>
+        <button class="event-type-btn" onclick="setEventType(this,'grooming')" data-t="grooming"><span class="et-icon">✂️</span>미용</button>
+        <button class="event-type-btn" onclick="setEventType(this,'weight')" data-t="weight"><span class="et-icon">⚖️</span>체중 측정</button>
+        <button class="event-type-btn" onclick="setEventType(this,'vaccine')" data-t="vaccine"><span class="et-icon">💉</span>예방접종</button>
+        <button class="event-type-btn" onclick="setEventType(this,'play')" data-t="play"><span class="et-icon">🎾</span>놀이</button>
+        <button class="event-type-btn" onclick="setEventType(this,'other')" data-t="other"><span class="et-icon">📌</span>기타</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">날짜</label>
+      <input type="date" class="form-input" id="eventDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모</label>
+      <textarea class="memo-textarea" id="eventMemo" placeholder="내용을 자유롭게 기록해보세요"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">사진 <span style="color:var(--ink-muted);font-weight:400">(여러 장 가능)</span></label>
+      <div class="photo-grid" id="eventPhotoGrid">
+        <button class="photo-add-btn" onclick="document.getElementById('eventPhotoInput').click()" title="사진 추가">+</button>
+      </div>
+      <input type="file" id="eventPhotoInput" accept="image/*" multiple style="display:none" onchange="handleEventPhotos(this)">
+    </div>
+    <div class="btn-row" id="eventBtnRow">
+      <button class="btn btn-cancel" onclick="closeEventModal()">취소</button>
+      <button class="btn btn-save" id="eventSaveBtn" onclick="saveEvent()" style="flex:2">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
 <!-- MEMO MODAL -->
 <div class="modal-overlay" id="memoModal" onclick="if(event.target===this)closeMemoModal()">
   <div class="modal">
@@ -578,12 +692,420 @@ let sb = null;
 
 // ── TABS ──────────────────────────────────────────────────
 function showTab(t){
-  ['today','manage','log'].forEach(n=>{
+  ['dashboard','today','manage','log','events'].forEach(n=>{
     document.getElementById('sec-'+n).classList.toggle('on',n===t);
     document.getElementById('tab-'+n).classList.toggle('on',n===t);
   });
   if(t==='log')renderLog();
+  if(t==='dashboard')renderDashboard();
+  if(t==='events')renderEventTab();
 }
+// ── DASHBOARD ────────────────────────────────────────────
+function renderDashboard(){
+  const wrap=document.getElementById('dashContent');
+  if(!wrap)return;
+  const cats=getCats();
+  if(cats.length===0){wrap.innerHTML='<div class="dash-empty">등록된 고양이가 없어요</div>';return;}
+
+  const days=['일','월','화','수','목','금','토'];
+  const td=todayStr();
+
+  // 최근 7일 날짜 배열
+  const dates=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    dates.push(`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`);
+  }
+
+  wrap.innerHTML='';
+
+  cats.forEach(cat=>{
+    const catId=cat.id;
+    const card=document.createElement('div');
+    card.className='dash-cat-card';
+
+    // 아바타
+    const avatarHtml=cat.photo_url
+      ?`<div class="dash-cat-avatar"><img src="${cat.photo_url}" alt="${cat.name}"></div>`
+      :`<div class="dash-cat-avatar">${cat.emoji}</div>`;
+
+    // 이번 주 복용률 계산
+    let totalDue=0,totalDone=0;
+    dates.forEach(ds=>{
+      const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));
+      totalDue+=items.length;
+      totalDone+=items.filter(i=>isLogDone(i.id,ds)).length;
+    });
+    const pct=totalDue>0?Math.round(totalDone/totalDue*100):null;
+
+    card.innerHTML=`
+      ${avatarHtml}
+      <div style="flex:1;min-width:0">
+        <div class="dash-cat-name">${cat.name}</div>
+        <div class="dash-cat-sub">${pct!==null?'이번 주 복용률 '+pct+'%':'등록된 약 없음'}</div>
+      </div>`;
+    card.querySelector('.dash-cat-avatar').after(...[]);
+    // rebuild properly
+    const header=document.createElement('div');
+    header.className='dash-cat-header';
+    if(cat.photo_url){
+      const av=document.createElement('div');av.className='dash-cat-avatar';
+      const im=document.createElement('img');im.src=cat.photo_url;im.alt=cat.name;
+      av.appendChild(im);header.appendChild(av);
+    } else {
+      const av=document.createElement('div');av.className='dash-cat-avatar';av.textContent=cat.emoji;header.appendChild(av);
+    }
+    const info=document.createElement('div');info.style.flex='1';
+    info.innerHTML=`<div class="dash-cat-name">${cat.name}</div><div class="dash-cat-sub">${pct!==null?'이번 주 복용률 '+pct+'%':'등록된 약 없음'}</div>`;
+    header.appendChild(info);
+    card.innerHTML='';
+    card.appendChild(header);
+
+    // 주간 바 차트
+    const weekWrap=document.createElement('div');
+    weekWrap.innerHTML='<div class="dash-legend"><span class="dash-legend-dot" style="background:var(--mint)"></span>완료 <span class="dash-legend-dot" style="background:var(--gold)"></span>컨디션메모</div>';
+    const weekRow=document.createElement('div');weekRow.className='dash-week';
+    dates.forEach(ds=>{
+      const d=new Date(ds);
+      const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));
+      const doneCount=items.filter(i=>isLogDone(i.id,ds)).length;
+      const total=items.length;
+      const ratio=total>0?doneCount/total:0;
+      const memo=getDailyMemo2(catId,ds);
+      const condArr=memo?(memo.conditions||memo.condition||'').split(',').filter(Boolean):[];
+      const condEmoji=condArr.length>0?condArr[0].split(' ')[0]:'';
+      const isToday=ds===td;
+
+      const col=total===0?'var(--border)':ratio===1?'var(--mint)':ratio>0?'var(--gold)':'var(--accent-soft)';
+      const height=total===0?6:Math.max(6,Math.round(ratio*40)+6);
+
+      const dayEl=document.createElement('div');dayEl.className='dash-day';
+      dayEl.innerHTML=`
+        <div class="dash-day-cond">${condEmoji}</div>
+        <div class="dash-day-bar" style="height:${height}px;background:${col}"></div>
+        <div class="dash-day-num${isToday?' today-num':''}">${d.getDate()}</div>
+        <div class="dash-day-lbl">${days[d.getDay()]}</div>`;
+      weekRow.appendChild(dayEl);
+    });
+    weekWrap.appendChild(weekRow);
+    card.appendChild(weekWrap);
+
+    // 최근 기록 리스트 (컨디션 + 복용 미완료)
+    const listWrap=document.createElement('div');listWrap.className='dash-section';
+    const listTitle=document.createElement('div');
+    listTitle.style.cssText='font-size:11px;color:var(--ink-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:600';
+    listTitle.textContent='최근 기록';
+    listWrap.appendChild(listTitle);
+
+    let hasEntry=false;
+    // 날짜 역순으로
+    [...dates].reverse().forEach(ds=>{
+      const d=new Date(ds);
+      const dateStr=(ds===td?'오늘':`${d.getMonth()+1}/${d.getDate()}`);
+      const memo=getDailyMemo2(catId,ds);
+      const items=getItems().filter(i=>(i.cat_id||i.catId)===catId&&isDue(i,ds));
+      const doneItems=items.filter(i=>isLogDone(i.id,ds));
+      const missItems=items.filter(i=>!isLogDone(i.id,ds));
+
+      // 컨디션 메모
+      if(memo){
+        const conds=(memo.conditions||memo.condition||'').split(',').filter(Boolean);
+        const txt=memo.memo_text||memo.memo||'';
+        const row=document.createElement('div');row.className='dash-row';
+        row.innerHTML=`<div class="dash-dot memo"></div>
+          <div class="dash-entry"><span class="dash-date">${dateStr}</span>
+          ${conds.map(c=>`<span class="dash-cond-pill">${c}</span>`).join('')}
+          ${txt?`<span style="color:var(--ink-muted)">${txt}</span>`:''}
+          </div>`;
+        listWrap.appendChild(row);hasEntry=true;
+      }
+
+      // 완료 항목 (간략히)
+      if(doneItems.length>0){
+        const row=document.createElement('div');row.className='dash-row';
+        row.innerHTML=`<div class="dash-dot done"></div>
+          <div class="dash-entry"><span class="dash-date">${dateStr}</span>${doneItems.map(i=>i.name).join(', ')} 복용 완료</div>`;
+        listWrap.appendChild(row);hasEntry=true;
+      }
+
+      // 미복용 항목
+      if(missItems.length>0&&ds!==td){
+        const row=document.createElement('div');row.className='dash-row';
+        row.innerHTML=`<div class="dash-dot miss"></div>
+          <div class="dash-entry"><span class="dash-date">${dateStr}</span>${missItems.map(i=>i.name).join(', ')} 미복용</div>`;
+        listWrap.appendChild(row);hasEntry=true;
+      }
+    });
+
+    if(!hasEntry){
+      listWrap.innerHTML+='<div class="dash-empty" style="padding:10px">최근 기록이 없어요</div>';
+    }
+    card.appendChild(listWrap);
+    wrap.appendChild(card);
+  });
+}
+
+// 특정 고양이의 daily memo 조회 (catId 명시)
+function getDailyMemo2(catId,ds){
+  if(isGuest) return G.logs.find(l=>l.cat===catId&&l.type==='daily_memo'&&l.date===ds)||null;
+  return D.logs.find(l=>l.log_type==='daily_memo'&&l.log_date===ds&&String(l.cat_id)===String(catId))||null;
+}
+
+// ── EVENTS ───────────────────────────────────────────────
+const EVENT_TYPES = {
+  hospital:{label:'병원 방문',icon:'🏥'},
+  grooming:{label:'미용',icon:'✂️'},
+  weight:{label:'체중 측정',icon:'⚖️'},
+  vaccine:{label:'예방접종',icon:'💉'},
+  play:{label:'놀이',icon:'🎾'},
+  other:{label:'기타',icon:'📌'},
+};
+
+let curEventType='hospital', eventPhotos=[], editEventId=null;
+
+function onFabClick(){
+  const activeTab=document.querySelector('.nav-tab.on')?.id;
+  if(activeTab==='tab-events') openEventModal();
+  else openAddModal();
+}
+
+function setEventType(el,t){
+  curEventType=t;
+  document.querySelectorAll('.event-type-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function openEventModal(ds){
+  editEventId=null; eventPhotos=[];
+  document.getElementById('eventModalTitle').textContent='이벤트 기록';
+  document.getElementById('eventSaveBtn').textContent='저장';
+  document.getElementById('eventMemo').value='';
+  document.getElementById('eventDate').value=ds||selDate||todayStr();
+  document.querySelectorAll('.event-type-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  curEventType='hospital';
+  document.getElementById('eventDeleteBtn')?.remove();
+  renderEventPhotoGrid();
+  document.getElementById('eventModal').classList.add('on');
+}
+
+function openEditEvent(id){
+  const ev=getEvents().find(e=>String(e.id)===String(id)); if(!ev)return;
+  editEventId=id; curEventType=ev.event_type||ev.type||'other';
+  document.getElementById('eventModalTitle').textContent='이벤트 편집';
+  document.getElementById('eventSaveBtn').textContent='수정 저장';
+  document.getElementById('eventMemo').value=ev.memo||ev.memo_text||'';
+  document.getElementById('eventDate').value=ev.event_date||ev.date||todayStr();
+  document.querySelectorAll('.event-type-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===curEventType));
+  // 기존 사진 로드
+  eventPhotos=(ev.photos||[]).map(url=>({url,isNew:false}));
+  document.getElementById('eventDeleteBtn')?.remove();
+  const capId=id;
+  const db=document.createElement('button');db.id='eventDeleteBtn';db.className='btn btn-danger';db.textContent='삭제';db.style.cssText='flex:0 0 auto';
+  db.onclick=()=>showCf('📌','이 이벤트를 삭제할까요?',async()=>{
+    if(!isGuest){
+      sync('busy');
+      try{await sb.from('events').delete().eq('id',capId);D.events=D.events.filter(e=>e.id!==capId);sync('ok');}
+      catch(e){toast('삭제 실패');sync('err');return;}
+    } else {G.events=G.events.filter(e=>e.id!==capId);saveGuest();}
+    closeEventModal();renderLog();toast('삭제됨');
+  });
+  document.getElementById('eventBtnRow').prepend(db);
+  renderEventPhotoGrid();
+  document.getElementById('eventModal').classList.add('on');
+}
+
+function closeEventModal(){
+  document.getElementById('eventModal').classList.remove('on');
+  document.getElementById('eventDeleteBtn')?.remove();
+  editEventId=null; eventPhotos=[];
+}
+
+function handleEventPhotos(input){
+  const files=Array.from(input.files);
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{eventPhotos.push({dataUrl:e.target.result,isNew:true,file});renderEventPhotoGrid();};
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+}
+
+function renderEventPhotoGrid(){
+  const grid=document.getElementById('eventPhotoGrid'); if(!grid)return;
+  grid.innerHTML='';
+  eventPhotos.forEach((p,i)=>{
+    const wrap=document.createElement('div');wrap.className='photo-thumb';
+    const img=document.createElement('img');img.src=p.dataUrl||p.url;
+    const del=document.createElement('button');del.className='del-btn';del.textContent='✕';
+    del.onclick=()=>{eventPhotos.splice(i,1);renderEventPhotoGrid();};
+    wrap.appendChild(img);wrap.appendChild(del);grid.appendChild(wrap);
+  });
+  const addBtn=document.createElement('button');addBtn.className='photo-add-btn';addBtn.textContent='+';addBtn.title='사진 추가';
+  addBtn.onclick=()=>document.getElementById('eventPhotoInput').click();
+  grid.appendChild(addBtn);
+}
+
+async function saveEvent(){
+  const memo=document.getElementById('eventMemo').value.trim();
+  const date=document.getElementById('eventDate').value||todayStr();
+  const catId=getActiveCat();
+  const btn=document.getElementById('eventSaveBtn');
+  btn.disabled=true; btn.textContent='저장 중...';
+
+  // 새 사진 업로드
+  let photoUrls=eventPhotos.filter(p=>!p.isNew).map(p=>p.url);
+  if(!isGuest&&user){
+    for(const p of eventPhotos.filter(p=>p.isNew)){
+      try{
+        const url=await dbUploadEventPhoto(p.dataUrl||p.file);
+        photoUrls.push(url);
+      }catch(e){console.warn('photo upload fail',e);}
+    }
+  } else {
+    // 게스트: base64 그대로
+    photoUrls=[...photoUrls,...eventPhotos.filter(p=>p.isNew).map(p=>p.dataUrl)];
+  }
+
+  const payload={cat_id:catId,event_type:curEventType,event_date:date,memo,photos:photoUrls};
+
+  if(!isGuest){
+    sync('busy');
+    try{
+      if(editEventId){
+        await sb.from('events').update(payload).eq('id',editEventId);
+        const ev=D.events.find(e=>e.id===editEventId);if(ev)Object.assign(ev,payload);
+      } else {
+        const{data,error}=await sb.from('events').insert({user_id:user.id,...payload}).select().single();
+        if(error)throw error;
+        D.events.push(data);
+      }
+      sync('ok');
+    }catch(e){toast('저장 실패: '+e.message);sync('err');btn.disabled=false;btn.textContent='저장';return;}
+  } else {
+    if(editEventId){const ev=G.events.find(e=>e.id===editEventId);if(ev)Object.assign(ev,{...payload,type:curEventType,date});}
+    else G.events.push({id:G.nid++,cat:catId,...payload,type:curEventType,date,photos:photoUrls});
+    saveGuest();
+  }
+  closeEventModal();renderLog();toast(editEventId?'수정됨':'이벤트 저장됨');
+  btn.disabled=false;btn.textContent='저장';
+}
+
+async function dbUploadEventPhoto(dataUrlOrFile){
+  let blob;
+  if(typeof dataUrlOrFile==='string'){
+    const res=await fetch(dataUrlOrFile);blob=await res.blob();
+  } else blob=dataUrlOrFile;
+  const ext=blob.type.split('/')[1]||'jpg';
+  const path=`${user.id}/events/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const{error}=await sb.storage.from('cat-photos').upload(path,blob,{upsert:true,contentType:blob.type});
+  if(error)throw error;
+  return sb.storage.from('cat-photos').getPublicUrl(path).data.publicUrl;
+}
+
+function getEvents(){
+  if(isGuest)return G.events||[];
+  return D.events||[];
+}
+
+function openLightbox(url){
+  document.getElementById('lightboxImg').src=url;
+  document.getElementById('lightbox').classList.add('on');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('on');}
+
+// ── renderLog 업데이트 ────────────────────────────────────
+function renderLog(){
+  renderCalStrip();
+  renderLogMemo();
+  const list=document.getElementById('logList');
+  const activeCat2=getActiveCat();
+  const items=getItems().filter(i=>(i.cat_id||i.catId)===activeCat2&&isDue(i,selDate));
+  if(items.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="emoji">📭</div><p>${fmtDate(selDate)}<br>복용 일정이 없어요</p></div>`;
+    return;
+  }
+  list.innerHTML='';
+  items.forEach(item=>{
+    const d=isLogDone(item.id,selDate);
+    const el=document.createElement('div');el.className='log-item';
+    el.innerHTML=`
+      <div class="log-dot ${d?'done':'miss'}"></div>
+      <div class="log-info"><div class="log-name">${item.name}</div><div class="log-time">${item.time} · ${freqLabel(item)}</div></div>
+      <span class="log-badge ${d?'done':'miss'}">${d?'✓ 완료':'미복용'}</span>`;
+    list.appendChild(el);
+  });
+}
+
+// ── 이벤트 탭 전용 렌더 ─────────────────────────────────
+let eventTypeFilter = 'all';
+
+function renderEventTab(){
+  renderEventFilterBar();
+  renderEventList();
+}
+
+function renderEventFilterBar(){
+  const bar=document.getElementById('eventFilterBar');if(!bar)return;
+  bar.innerHTML='';
+  const types=[['all','전체','🐾'],...Object.entries(EVENT_TYPES).map(([k,v])=>[k,v.label,v.icon])];
+  types.forEach(([k,label,icon])=>{
+    const btn=document.createElement('button');
+    btn.className='time-chip'+(eventTypeFilter===k?' on':'');
+    btn.textContent=icon+' '+label;
+    btn.onclick=()=>{eventTypeFilter=k;renderEventFilterBar();renderEventList();};
+    bar.appendChild(btn);
+  });
+}
+
+function renderEventList(){
+  const wrap=document.getElementById('eventList');if(!wrap)return;
+  const catId=getActiveCat();
+  let evs=getEvents().filter(e=>String(e.cat_id||e.cat)===String(catId));
+  if(eventTypeFilter!=='all') evs=evs.filter(e=>(e.event_type||e.type)===eventTypeFilter);
+  // 날짜 내림차순
+  evs=evs.sort((a,b)=>((b.event_date||b.date)||'').localeCompare((a.event_date||a.date)||''));
+  if(evs.length===0){
+    wrap.innerHTML=`<div class="empty-state"><div class="emoji">📸</div><p>기록된 이벤트가 없어요.<br>+ 버튼으로 추가해보세요!</p></div>`;
+    return;
+  }
+  wrap.innerHTML='';
+  // 날짜 그룹핑
+  let lastDate='';
+  evs.forEach(ev=>{
+    const ds=ev.event_date||ev.date||'';
+    if(ds!==lastDate){
+      lastDate=ds;
+      const dateLbl=document.createElement('div');
+      dateLbl.style.cssText='font-size:11.5px;color:var(--ink-muted);margin:12px 0 6px;font-weight:500';
+      dateLbl.textContent=fmtDate(ds)||ds;
+      wrap.appendChild(dateLbl);
+    }
+    const t=ev.event_type||ev.type||'other';
+    const info=EVENT_TYPES[t]||{label:t,icon:'📌'};
+    const photos=ev.photos||[];
+    const card=document.createElement('div');card.className='event-card';
+    const photosHtml=photos.length>0
+      ?`<div class="event-photo-grid">${photos.map(u=>`<img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" alt="">`).join('')}</div>`:'';
+    card.innerHTML=`
+      <div class="event-card-header">
+        <div class="event-card-icon">${info.icon}</div>
+        <div class="event-card-meta">
+          <div class="event-card-title">${info.label}</div>
+          <div class="event-card-time">${ds}</div>
+        </div>
+        <button class="event-edit-btn" data-id="${ev.id}">✏️</button>
+      </div>
+      ${ev.memo?`<div class="event-card-memo">${ev.memo}</div>`:''}
+      ${photosHtml}`;
+    card.querySelector('.event-edit-btn').addEventListener('click',()=>openEditEvent(ev.id));
+    wrap.appendChild(card);
+  });
+}
+
+
+
+function renderAll(){renderToday();renderManage();renderTodayMemo();}
+
 function renderAll(){renderToday();renderManage();renderTodayMemo();}
 
 // ── CAT BAR ───────────────────────────────────────────────
@@ -953,9 +1475,10 @@ function renderCalStrip(){
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     const s=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    const catId=getActiveCat();
     const hasLog=isGuest
-      ?G.logs.some(l=>l.cat===G.activeCat&&l.date===s&&l.done)
-      :D.logs.some(l=>l.log_date===s&&l.done);
+      ?(G.logs.some(l=>l.cat===G.activeCat&&l.date===s&&l.done)||G.events?.some(e=>e.cat===G.activeCat&&(e.date||e.event_date)===s))
+      :(D.logs.some(l=>l.log_date===s&&l.done)||D.events?.some(e=>String(e.cat_id)===String(catId)&&e.event_date===s));
     const el=document.createElement('div');
     el.className=`cal-day${s===td?' today':''}${hasLog?' has-dot':''}${s===selDate?' sel':''}`;
     el.innerHTML=`<div class="cal-num">${d.getDate()}</div><div class="cal-lbl">${days[d.getDay()]}</div>`;
@@ -1284,10 +1807,10 @@ const FREQ = {daily:'매일',alt:'격일',weekly:'매주',mon:'월·수·금',tu
 let user = null, isGuest = false;
 // 게스트용 로컬 스토리지 상태
 let G = JSON.parse(localStorage.getItem('catGuest') || 'null') || {
-  cats:[{id:1,name:'냥이',emoji:'🐱'}], activeCat:1, items:[], logs:[], nid:100
+  cats:[{id:1,name:'냥이',emoji:'🐱'}], activeCat:1, items:[], logs:[], events:[], nid:100
 };
 // 로그인 유저 데이터 (Supabase에서 로드)
-let D = { cats:[], items:[], logs:[] };
+let D = { cats:[], items:[], logs:[], events:[] };
 
 const saveGuest = () => localStorage.setItem('catGuest', JSON.stringify(G));
 
@@ -1413,12 +1936,13 @@ async function loadAll(){
   if(isGuest||!user)return;
   sync('busy');
   try{
-    const[cats,items,logs]=await Promise.all([
+    const[cats,items,logs,events]=await Promise.all([
       sb.from('cats').select('*').eq('user_id',user.id).order('created_at'),
       sb.from('items').select('*').eq('user_id',user.id).order('created_at'),
       sb.from('logs').select('*').eq('user_id',user.id).order('log_date',{ascending:false}),
+      sb.from('events').select('*').eq('user_id',user.id).order('event_date',{ascending:false}),
     ]);
-    D.cats=cats.data||[]; D.items=items.data||[]; D.logs=logs.data||[];
+    D.cats=cats.data||[]; D.items=items.data||[]; D.logs=logs.data||[]; D.events=events.data||[];
     if(!D.activeCat&&D.cats.length>0)D.activeCat=D.cats[0].id;
     sync('ok');
   }catch(e){sync('err');toast('데이터 로드 실패');}
