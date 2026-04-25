@@ -902,20 +902,21 @@ async function saveMemo(){
   if(!isGuest){
     sync('busy');
     try{
-      const existing=D.logs.find(l=>l.log_type==='daily_memo'&&l.log_date===ds&&l.cat_id===catId);
+      const existing=D.logs.find(l=>l.log_type==='daily_memo'&&l.log_date===ds&&String(l.cat_id)===String(catId));
       if(existing){
-        await sb.from('logs').update({memo_text:txt,conditions:conds}).eq('id',existing.id);
+        const{error}=await sb.from('logs').update({memo_text:txt,conditions:conds}).eq('id',existing.id);
+        if(error)throw error;
         existing.memo_text=txt; existing.conditions=conds;
       } else {
         const{data,error}=await sb.from('logs').insert({
           user_id:user.id, cat_id:catId, log_type:'daily_memo',
           log_date:ds, done:true, memo_text:txt, conditions:conds
         }).select().single();
-        if(error)throw error;
+        if(error)throw new Error(error.message+' (컬럼 누락 가능성: log_type, memo_text, conditions, cat_id)');
         D.logs.push(data);
       }
       sync('ok');
-    }catch(e){toast('저장 실패');sync('err');return;}
+    }catch(e){toast('저장 실패: '+e.message);sync('err');console.error('saveMemo error:',e);return;}
   } else {
     const idx=G.logs.findIndex(l=>l.cat===G.activeCat&&l.type==='daily_memo'&&l.date===ds);
     if(idx>=0){G.logs[idx].memo=txt;G.logs[idx].condition=conds;}
